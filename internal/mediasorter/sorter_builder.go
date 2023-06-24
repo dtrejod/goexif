@@ -22,12 +22,13 @@ var (
 		".gif",
 		".xcf",
 	}
-	defaultDirectoryBlocklist = []*regexp.Regexp{
+	// DefaultBlocklist
+	DefaultBlocklist = []*regexp.Regexp{
 		regexp.MustCompile(`(\/)?lost\/`),
 		regexp.MustCompile(`(\/)?noexif\/`),
 		regexp.MustCompile(`(\/)?duplicates\/`),
 		regexp.MustCompile(`(\/)?slideshows\/`),
-		regexp.MustCompile(`(\/)?raw\/*`),
+		regexp.MustCompile(`(\/)?raw\/`),
 	}
 	invalidConfigErr = errors.New("invalid configuration")
 )
@@ -55,8 +56,8 @@ type builderOptions struct {
 	cleanFileExtensions bool
 	stopWalkOnError     bool
 
-	fileTypes          []string
-	directoryBlocklist []*regexp.Regexp
+	fileTypes []string
+	blocklist []*regexp.Regexp
 
 	sourceDirectory      *string
 	destinationDirectory *string
@@ -64,8 +65,8 @@ type builderOptions struct {
 
 func NewSorter(ctx context.Context, opts ...Option) (Sorter, error) {
 	cfg := &builderOptions{
-		fileTypes:          uniqLoweredSlice(DefaultFileTypes),
-		directoryBlocklist: defaultDirectoryBlocklist,
+		fileTypes: uniqLoweredSlice(DefaultFileTypes),
+		blocklist: DefaultBlocklist,
 	}
 
 	for _, opt := range opts {
@@ -92,7 +93,7 @@ func NewSorter(ctx context.Context, opts ...Option) (Sorter, error) {
 		cleanFileExtensions:  cfg.cleanFileExtensions,
 		stopWalkOnError:      cfg.stopWalkOnError,
 		fileTypes:            cfg.fileTypes,
-		directoryBlocklist:   cfg.directoryBlocklist,
+		blocklist:            cfg.blocklist,
 		sourceDirectory:      *cfg.sourceDirectory,
 		destinationDirectory: cfg.destinationDirectory,
 	}, nil
@@ -155,10 +156,10 @@ func WithFileTypes(t []string) Option {
 	})
 }
 
-// WithDirectoryBlocklist is an array of regular expressions for matching on
-// directories to ignore when finding folders. Directory are matched
+// WithRegexBlocklist is an array of regular expressions for matching on
+// paths to ignore when finding folders. Directory are matched
 // case-insensitive
-func WithDirectoryBlocklist(d []string) Option {
+func WithRegexBlocklist(d []string) Option {
 	return builderFunc(func(b *builderOptions) error {
 		patterns := uniqLoweredSlice(d)
 
@@ -170,7 +171,7 @@ func WithDirectoryBlocklist(d []string) Option {
 			}
 			exprs = append(exprs, re)
 		}
-		b.directoryBlocklist = exprs
+		b.blocklist = exprs
 		return nil
 	})
 }

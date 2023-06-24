@@ -35,7 +35,7 @@ type sorter struct {
 	stopWalkOnError     bool
 
 	fileTypes            []string
-	directoryBlocklist   []*regexp.Regexp
+	blocklist            []*regexp.Regexp
 	sourceDirectory      string
 	destinationDirectory *string
 }
@@ -59,10 +59,14 @@ func (s *sorter) traverseFunc(ctx context.Context) fs.WalkDirFunc {
 		logger := ilog.FromContext(ctx).With(zap.String("path", path))
 
 		if info.IsDir() {
+			if s.isBlocked(path) {
+				logger.Debug("Directory matches blocklist. Skipping entire directory...")
+				return fs.SkipDir
+			}
 			return nil
 		}
 
-		if s.isBlockedDir(path) {
+		if s.isBlocked(path) {
 			logger.Debug("Path in blocklist, so skipping...")
 			return fs.SkipDir
 		}
@@ -84,8 +88,8 @@ func (s *sorter) traverseFunc(ctx context.Context) fs.WalkDirFunc {
 	}
 }
 
-func (s *sorter) isBlockedDir(path string) bool {
-	for _, d := range s.directoryBlocklist {
+func (s *sorter) isBlocked(path string) bool {
+	for _, d := range s.blocklist {
 		if d.MatchString(strings.ToLower(path)) {
 			return true
 		}

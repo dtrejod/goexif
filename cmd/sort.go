@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"regexp"
 
 	"github.com/dtrejod/goexif/internal/mediasorter"
 	"github.com/spf13/cobra"
@@ -18,6 +19,7 @@ const (
 	stopOnErrorFlagName     = "quick-exit"
 	cleanFileExtFlagName    = "clean-ext"
 	fileExtsFlagName        = "extensions"
+	blocklistRegexFlagName  = "blocklist-regexes"
 )
 
 var (
@@ -30,6 +32,7 @@ var (
 	cleanFileExt    bool
 	stopOnError     bool
 	fileExts        []string
+	blocklistRe     []string
 )
 
 var sortCmd = &cobra.Command{
@@ -64,6 +67,9 @@ func shortRun(_ *cobra.Command, _ []string) {
 	if len(fileExts) > 0 {
 		opts = append(opts, mediasorter.WithFileTypes(fileExts))
 	}
+	if len(blocklistRe) > 0 {
+		opts = append(opts, mediasorter.WithRegexBlocklist(blocklistRe))
+	}
 
 	s, err := mediasorter.NewSorter(ctx, opts...)
 	if err != nil {
@@ -78,8 +84,11 @@ func shortRun(_ *cobra.Command, _ []string) {
 }
 
 func init() {
-	sortCmd.Flags().StringVarP(&sourceDir, sourceDirFlagName, "s", "", "source directory to scan for media files")
-	sortCmd.Flags().StringVar(&destDir, destinationDirFlagName, "", "destination directory to move files into")
+	sortCmd.Flags().StringVarP(&sourceDir, sourceDirFlagName, "s", "", "Source directory to scan for media files")
+	sortCmd.Flags().StringVar(&destDir,
+		destinationDirFlagName,
+		"",
+		"Destination directory to move files into. If not specified uses the relative directory where the original file was found")
 	sortCmd.Flags().BoolVarP(&dryRun, dryRunFlagName, "n", true, "Do nothing, only show what would happen")
 	sortCmd.Flags().BoolVar(&tsAsFilename, tsAsFilenameFlagName, false, "Use timestamp as new filename")
 	sortCmd.Flags().BoolVar(&modTimeFallback,
@@ -94,9 +103,21 @@ func init() {
 	sortCmd.Flags().BoolVar(&stopOnError, stopOnErrorFlagName, false, "Exit on first error")
 	sortCmd.Flags().StringArrayVar(&fileExts,
 		fileExtsFlagName,
-		[]string{},
-		fmt.Sprintf("Allowlist of file extensions to match on (default: %v)", mediasorter.DefaultFileTypes))
+		mediasorter.DefaultFileTypes,
+		"Allowlist of file extensions to match on")
+	sortCmd.Flags().StringArrayVar(&blocklistRe,
+		blocklistRegexFlagName,
+		sliceReToString(mediasorter.DefaultBlocklist),
+		fmt.Sprintf("Regex blocklist that will skip"))
 
 	_ = sortCmd.MarkFlagRequired(sourceDirFlagName)
 	rootCmd.AddCommand(sortCmd)
+}
+
+func sliceReToString(in []*regexp.Regexp) []string {
+	out := make([]string, 0, len(in))
+	for _, r := range in {
+		out = append(out, r.String())
+	}
+	return out
 }
