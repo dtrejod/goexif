@@ -171,7 +171,11 @@ func (s *sorter) getFileTimestamp(path string) (ts time.Time, err error) {
 		return time.Time{}, fmt.Errorf("%w: %s", unknownMediaErr, v)
 	}
 
-	return exifdata.GetExifTime(path)
+	ts, err = exifdata.GetExifTime(path)
+	if err != nil {
+		return time.Time{}, fmt.Errorf("%w: %w", runtimeErr, err)
+	}
+	return ts, nil
 }
 
 func (s *sorter) getOutputFile(ts time.Time, srcPath string) (string, error) {
