@@ -178,7 +178,7 @@ func (s *sorter) getOutputFile(ts time.Time, srcPath string) (string, error) {
 	origDir := filepath.Dir(srcPath)
 	outDir := filepath.Join(origDir, ts.Format(outPathDateFormat))
 	if s.destinationDirectory != nil {
-		outDir = filepath.Join(*s.destinationDirectory, outDir)
+		outDir = filepath.Join(*s.destinationDirectory, ts.Format(outPathDateFormat))
 	}
 
 	ext, err := getExt(srcPath, s.cleanFileExtensions)
