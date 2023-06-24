@@ -5,7 +5,7 @@ import (
 	"os"
 	"regexp"
 
-	"github.com/dtrejod/goexif/internal/mediasorter"
+	"github.com/dtrejod/goexif/internal/media"
 	"github.com/spf13/cobra"
 )
 
@@ -15,26 +15,26 @@ const (
 	dryRunFlagName            = "dry-run"
 	tsAsFilenameFlagName      = "ts-as-filename"
 	modTimeFallbackFlagName   = "fallback-mod-time"
-	magicSignatureFlagName    = "magic-sig"
 	overwriteExistingFlagName = "overwrite"
 	stopOnErrorFlagName       = "stop-on-err"
-	cleanFileExtFlagName      = "clean-file-ext"
+	magicSignatureInFlagName  = "magic-ext-in"
+	magicSignatureOutFlagName = "magic-ext-out"
 	fileExtsFlagName          = "extensions"
 	blocklistRegexFlagName    = "blocklist-regexes"
 )
 
 var (
-	sourceDir       string
-	destDir         string
-	dryRun          bool
-	tsAsFilename    bool
-	modTimeFallback bool
-	magicSignature  bool
-	overwrite       bool
-	cleanFileExt    bool
-	stopOnError     bool
-	fileExts        []string
-	blocklistRe     []string
+	sourceDir         string
+	destDir           string
+	dryRun            bool
+	tsAsFilename      bool
+	modTimeFallback   bool
+	magicSignatureIn  bool
+	overwrite         bool
+	magicSignatureOut bool
+	stopOnError       bool
+	fileExts          []string
+	blocklistRe       []string
 )
 
 var sortCmd = &cobra.Command{
@@ -44,39 +44,39 @@ var sortCmd = &cobra.Command{
 }
 
 func shortRun(_ *cobra.Command, _ []string) {
-	opts := []mediasorter.Option{mediasorter.WithSourceDirectory(sourceDir)}
+	opts := []media.Option{media.WithSourceDirectory(sourceDir)}
 	if destDir != "" {
-		opts = append(opts, mediasorter.WithDestinationDirectory(destDir))
+		opts = append(opts, media.WithDestinationDirectory(destDir))
 	}
 	if dryRun {
-		opts = append(opts, mediasorter.WithDryRun())
+		opts = append(opts, media.WithDryRun())
 	}
 	if tsAsFilename {
-		opts = append(opts, mediasorter.WithTimestampAsFilename())
+		opts = append(opts, media.WithTimestampAsFilename())
 	}
 	if modTimeFallback {
-		opts = append(opts, mediasorter.WithLastModifiedFallback())
+		opts = append(opts, media.WithLastModifiedFallback())
 	}
-	if magicSignature {
-		opts = append(opts, mediasorter.WithUseFileMagicSignature())
+	if magicSignatureIn {
+		opts = append(opts, media.WithIdentifyFileMagicSignature())
 	}
-	if cleanFileExt {
-		opts = append(opts, mediasorter.WithCleanFileExtensions())
+	if magicSignatureOut {
+		opts = append(opts, media.WithGenOutputFileMagicSignature())
 	}
 	if overwrite {
-		opts = append(opts, mediasorter.WithOverwriteExisting())
+		opts = append(opts, media.WithOverwriteExisting())
 	}
 	if stopOnError {
-		opts = append(opts, mediasorter.WithStopOnError())
+		opts = append(opts, media.WithStopOnError())
 	}
 	if len(fileExts) > 0 {
-		opts = append(opts, mediasorter.WithFileTypes(fileExts))
+		opts = append(opts, media.WithFileTypes(fileExts))
 	}
 	if len(blocklistRe) > 0 {
-		opts = append(opts, mediasorter.WithRegexBlocklist(blocklistRe))
+		opts = append(opts, media.WithRegexBlocklist(blocklistRe))
 	}
 
-	s, err := mediasorter.NewSorter(ctx, opts...)
+	s, err := media.NewSorter(ctx, opts...)
 	if err != nil {
 		os.Exit(1)
 	}
@@ -100,12 +100,12 @@ func init() {
 		modTimeFallbackFlagName,
 		false,
 		"Fallback to using file modified time if no exif data is found")
-	sortCmd.Flags().BoolVar(&magicSignature,
-		magicSignatureFlagName,
+	sortCmd.Flags().BoolVar(&magicSignatureIn,
+		magicSignatureInFlagName,
 		false,
 		"Ignore existing file extension and use magic signature instead when identifying files")
-	sortCmd.Flags().BoolVar(&cleanFileExt,
-		cleanFileExtFlagName,
+	sortCmd.Flags().BoolVar(&magicSignatureOut,
+		magicSignatureOutFlagName,
 		false,
 		"Ignore existing file extension and use magic signature instead when generating new destination path")
 	sortCmd.Flags().BoolVar(&overwrite,
@@ -115,11 +115,11 @@ func init() {
 	sortCmd.Flags().BoolVar(&stopOnError, stopOnErrorFlagName, false, "Exit on first error")
 	sortCmd.Flags().StringArrayVar(&fileExts,
 		fileExtsFlagName,
-		mediasorter.DefaultFileTypes,
+		media.DefaultFileTypes,
 		"Allowlist of file extensions to match on")
 	sortCmd.Flags().StringArrayVar(&blocklistRe,
 		blocklistRegexFlagName,
-		sliceReToString(mediasorter.DefaultBlocklist),
+		sliceReToString(media.DefaultBlocklist),
 		fmt.Sprintf("Regex blocklist that will skip"))
 
 	_ = sortCmd.MarkFlagRequired(sourceDirFlagName)

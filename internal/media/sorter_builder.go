@@ -1,4 +1,4 @@
-package mediasorter
+package media
 
 import (
 	"context"
@@ -127,20 +127,20 @@ func WithLastModifiedFallback() Option {
 	})
 }
 
-// WithUseFileMagicSignature instructs the sorter to idenitify media files using the
+// WithIdentifyFileMagicSignature instructs the sorter to idenitify media files using the
 // file's magic signature. If set, then files are renamed to the approriate
 // extension accordingly.
 // See the manual page for file(1) to understand how this works.
-func WithUseFileMagicSignature() Option {
+func WithIdentifyFileMagicSignature() Option {
 	return builderFunc(func(b *builderOptions) error {
 		b.useMagicSignature = true
 		return nil
 	})
 }
 
-// WithCleanFileExtensions will cause media file extensions to be consistent.
+// WithGenOutputFileMagicSignature will cause media file extensions to be consistent.
 // For example, .jpeg will be renamed to .jpg
-func WithCleanFileExtensions() Option {
+func WithGenOutputFileMagicSignature() Option {
 	return builderFunc(func(b *builderOptions) error {
 		b.cleanFileExtensions = true
 		return nil

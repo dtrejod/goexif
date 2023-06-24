@@ -1,4 +1,4 @@
-package mediasorter
+package media
 
 import (
 	"context"
