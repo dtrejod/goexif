@@ -22,13 +22,12 @@ var (
 		".gif",
 		".xcf",
 	}
-	// DefaultBlocklist
+	// DefaultBlocklist are default regexes that are ignored by the sorter.
 	DefaultBlocklist = []*regexp.Regexp{
-		regexp.MustCompile(`(\/)?lost\/`),
-		regexp.MustCompile(`(\/)?noexif\/`),
-		regexp.MustCompile(`(\/)?duplicates\/`),
-		regexp.MustCompile(`(\/)?slideshows\/`),
-		regexp.MustCompile(`(\/)?raw\/`),
+		// ignore date pattern used internally by the sorter.
+		// Makes subsequent runs iterative instead of
+		// repeatedly processing the same media files
+		regexp.MustCompile(`(\/)?\d{4}\/(\d{2}\/){2}`),
 	}
 	invalidConfigErr = errors.New("invalid configuration")
 )
@@ -54,6 +53,7 @@ type builderOptions struct {
 	useLastModifiedDate bool
 	useMagicSignature   bool
 	cleanFileExtensions bool
+	overwriteExisting   bool
 	stopWalkOnError     bool
 
 	fileTypes []string
@@ -91,6 +91,7 @@ func NewSorter(ctx context.Context, opts ...Option) (Sorter, error) {
 		useLastModifiedDate:  cfg.useLastModifiedDate,
 		useMagicSignature:    cfg.useMagicSignature,
 		cleanFileExtensions:  cfg.cleanFileExtensions,
+		overwriteExisting:    cfg.overwriteExisting,
 		stopWalkOnError:      cfg.stopWalkOnError,
 		fileTypes:            cfg.fileTypes,
 		blocklist:            cfg.blocklist,
@@ -189,6 +190,17 @@ func WithSourceDirectory(s string) Option {
 func WithDestinationDirectory(d string) Option {
 	return builderFunc(func(b *builderOptions) error {
 		b.destinationDirectory = &d
+		return nil
+	})
+}
+
+// WithOverwriteExisting instructs the sorter to overwrite any existing files
+// that may already exist with the same desired destination file name
+// Warning: Can be useful for removing duplicates by ensuring no two files with
+// the same timestamp can exist, however, can cause data loss if not careful
+func WithOverwriteExisting() Option {
+	return builderFunc(func(b *builderOptions) error {
+		b.overwriteExisting = true
 		return nil
 	})
 }

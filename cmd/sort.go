@@ -10,16 +10,17 @@ import (
 )
 
 const (
-	sourceDirFlagName       = "source-directory"
-	destinationDirFlagName  = "dest-directory"
-	dryRunFlagName          = "dry-run"
-	tsAsFilenameFlagName    = "ts-as-filename"
-	modTimeFallbackFlagName = "mod-time-fallback"
-	magicSignatureFlagName  = "magic-sig"
-	stopOnErrorFlagName     = "quick-exit"
-	cleanFileExtFlagName    = "clean-ext"
-	fileExtsFlagName        = "extensions"
-	blocklistRegexFlagName  = "blocklist-regexes"
+	sourceDirFlagName         = "source-dir"
+	destinationDirFlagName    = "dest-dir"
+	dryRunFlagName            = "dry-run"
+	tsAsFilenameFlagName      = "ts-as-filename"
+	modTimeFallbackFlagName   = "fallback-mod-time"
+	magicSignatureFlagName    = "magic-sig"
+	overwriteExistingFlagName = "overwrite"
+	stopOnErrorFlagName       = "stop-on-err"
+	cleanFileExtFlagName      = "clean-file-ext"
+	fileExtsFlagName          = "extensions"
+	blocklistRegexFlagName    = "blocklist-regexes"
 )
 
 var (
@@ -29,6 +30,7 @@ var (
 	tsAsFilename    bool
 	modTimeFallback bool
 	magicSignature  bool
+	overwrite       bool
 	cleanFileExt    bool
 	stopOnError     bool
 	fileExts        []string
@@ -60,6 +62,9 @@ func shortRun(_ *cobra.Command, _ []string) {
 	}
 	if cleanFileExt {
 		opts = append(opts, mediasorter.WithCleanFileExtensions())
+	}
+	if overwrite {
+		opts = append(opts, mediasorter.WithOverwriteExisting())
 	}
 	if stopOnError {
 		opts = append(opts, mediasorter.WithStopOnError())
@@ -98,8 +103,15 @@ func init() {
 	sortCmd.Flags().BoolVar(&magicSignature,
 		magicSignatureFlagName,
 		false,
-		"Ignore existing file extension and use magic signature instead")
-	sortCmd.Flags().BoolVar(&cleanFileExt, cleanFileExtFlagName, false, "Attempt to clean original file extension")
+		"Ignore existing file extension and use magic signature instead when identifying files")
+	sortCmd.Flags().BoolVar(&cleanFileExt,
+		cleanFileExtFlagName,
+		false,
+		"Ignore existing file extension and use magic signature instead when generating new destination path")
+	sortCmd.Flags().BoolVar(&overwrite,
+		overwriteExistingFlagName,
+		false,
+		"Overwrite existing files on rename. WARN: Use with caution!")
 	sortCmd.Flags().BoolVar(&stopOnError, stopOnErrorFlagName, false, "Exit on first error")
 	sortCmd.Flags().StringArrayVar(&fileExts,
 		fileExtsFlagName,

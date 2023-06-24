@@ -24,6 +24,7 @@ const (
 
 var (
 	unknownMediaErr = errors.New("unhandled media type")
+	runtimeErr      = errors.New("runtime error")
 )
 
 type sorter struct {
@@ -33,6 +34,7 @@ type sorter struct {
 	useMagicSignature   bool
 	cleanFileExtensions bool
 	stopWalkOnError     bool
+	overwriteExisting   bool
 
 	fileTypes            []string
 	blocklist            []*regexp.Regexp
@@ -60,7 +62,7 @@ func (s *sorter) traverseFunc(ctx context.Context) fs.WalkDirFunc {
 
 		if info.IsDir() {
 			if s.isBlocked(path) {
-				logger.Debug("Directory matches blocklist. Skipping entire directory...")
+				logger.Debug("Directory matches blocklist, so skipping entire directory...")
 				return fs.SkipDir
 			}
 			return nil
@@ -73,12 +75,12 @@ func (s *sorter) traverseFunc(ctx context.Context) fs.WalkDirFunc {
 
 		logger.Debug("Checking file.")
 		if !s.isExtMatch(path) {
-			logger.Debug("File didn't match handled file types.")
+			logger.Debug("File did not match handled file types, so skipping...")
 			return nil
 		}
 
 		if err := s.handleFile(ctx, path); err != nil {
-			logger.Error("Failed to handle file", zap.Error(err))
+			logger.Warn("Failed to handle file.", zap.Error(err))
 			if s.stopWalkOnError {
 				return err
 			}
@@ -112,25 +114,38 @@ func (s *sorter) isExtMatch(path string) bool {
 }
 
 func (s *sorter) handleFile(ctx context.Context, srcPath string) error {
-	logger := ilog.FromContext(ctx).With(zap.String("path", srcPath))
-	logger.Info("Checking EXIF for file.")
+	logger := ilog.FromContext(ctx).With(zap.String("sourcePath", srcPath))
 
 	ts, err := s.getFileTimestamp(srcPath)
 	if err != nil {
 		return err
 	}
-	logger.Info("Discovered timestamp", zap.Time("timestamp", ts))
+	logger.Debug("Discovered timestamp.", zap.String("timestamp", ts.String()), zap.Time("timestampUnix", ts))
 
-	outFileName, err := s.getOutputFile(ts, srcPath)
+	outPath, err := s.getOutputFile(ts, srcPath)
 	if err != nil {
 		return err
 	}
+	logger = logger.With(zap.String("destinationPath", outPath))
 
 	if s.dryRun {
-		logger.Info("Dry run... Mock moving file.",
-			zap.String("sourcePath", srcPath),
-			zap.String("destinationPath", outFileName))
+		logger.Info("Dry run... Mock moving file.")
+		return nil
 	}
+
+	if err := s.handleOverwrite(ctx, outPath); err != nil {
+		return err
+	}
+
+	if err := os.MkdirAll(outPath, 0755); err != nil {
+		return err
+	}
+
+	if err := os.Rename(srcPath, outPath); err != nil {
+		return err
+	}
+
+	logger.Info("Successfully renamed file.")
 	return nil
 }
 
@@ -170,13 +185,32 @@ func (s *sorter) getOutputFile(ts time.Time, srcPath string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("%w: could not get file extension", err)
 	}
-	outFilename := filepath.Base(srcPath)
+	outFilename := strings.TrimSuffix(filepath.Base(srcPath), filepath.Ext(srcPath))
 	if s.timestampAsFilename {
 		outFilename = strconv.FormatInt(ts.Unix(), 10)
 	}
 	outFilename = outFilename + ext
 
 	return filepath.Join(outDir, outFilename), nil
+}
+
+func (s *sorter) handleOverwrite(ctx context.Context, path string) error {
+	_, err := os.Stat(path)
+	if err == nil {
+		// file exists
+		if s.overwriteExisting {
+			ilog.FromContext(ctx).Info("Overwrite flag set. Removing existing file.",
+				zap.String("path", path))
+			// delete existing file it exists
+			return os.Remove(path)
+		}
+		return fmt.Errorf("%w: desired destination file already exists", runtimeErr)
+	}
+	if !errors.Is(err, os.ErrNotExist) {
+		// unknown error
+		return fmt.Errorf("%w: could not check if desired out file exist", err)
+	}
+	return nil
 }
 
 // getExt returns the file extension, using the magic signature if desired. The
