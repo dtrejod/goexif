@@ -189,6 +189,9 @@ func (s *sorter) getOutputFile(ts time.Time, srcPath string) (string, error) {
 	if s.timestampAsFilename {
 		outFilename = strconv.FormatInt(ts.Unix(), 10)
 	}
+	if outFilename == "" {
+		return "", fmt.Errorf("%w: output file has no filename", runtimeErr)
+	}
 	outFilename = outFilename + ext
 
 	return filepath.Join(outDir, outFilename), nil
