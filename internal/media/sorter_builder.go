@@ -14,13 +14,13 @@ import (
 var (
 	// DefaultFileTypes are the default media types handled by the sorter if none are specified.
 	DefaultFileTypes = []string{
-		".jpg",
-		".jpeg",
-		".png",
-		".tif",
-		".tiff",
-		".gif",
-		".xcf",
+		"jpg",
+		"jpeg",
+		"png",
+		"tif",
+		"tiff",
+		"gif",
+		"xcf",
 	}
 	// DefaultBlocklist are default regexes that are ignored by the sorter.
 	DefaultBlocklist = []*regexp.Regexp{

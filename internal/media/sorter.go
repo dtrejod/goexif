@@ -74,7 +74,7 @@ func (s *sorter) traverseFunc(ctx context.Context) fs.WalkDirFunc {
 		}
 
 		logger.Debug("Checking file.")
-		if !s.isExtMatch(path) {
+		if !s.isFileTypeMatch(path) {
 			logger.Debug("File did not match handled file types, so skipping...")
 			return nil
 		}
@@ -99,11 +99,12 @@ func (s *sorter) isBlocked(path string) bool {
 	return false
 }
 
-func (s *sorter) isExtMatch(path string) bool {
+func (s *sorter) isFileTypeMatch(path string) bool {
 	ext, err := getExt(path, s.useMagicSignature)
 	if err != nil {
 		return false
 	}
+	ext = strings.TrimPrefix(ext, ".")
 	for _, t := range s.fileTypes {
 		if ext == t {
 			return true

@@ -19,7 +19,7 @@ const (
 	stopOnErrorFlagName       = "stop-on-err"
 	magicSignatureInFlagName  = "magic-ext-in"
 	magicSignatureOutFlagName = "magic-ext-out"
-	fileExtsFlagName          = "extensions"
+	fileTypesFlagName         = "file-types"
 	blocklistRegexFlagName    = "blocklist-regexes"
 )
 
@@ -33,7 +33,7 @@ var (
 	overwrite         bool
 	magicSignatureOut bool
 	stopOnError       bool
-	fileExts          []string
+	fileTypes         []string
 	blocklistRe       []string
 )
 
@@ -69,8 +69,8 @@ func shortRun(_ *cobra.Command, _ []string) {
 	if stopOnError {
 		opts = append(opts, media.WithStopOnError())
 	}
-	if len(fileExts) > 0 {
-		opts = append(opts, media.WithFileTypes(fileExts))
+	if len(fileTypes) > 0 {
+		opts = append(opts, media.WithFileTypes(fileTypes))
 	}
 	if len(blocklistRe) > 0 {
 		opts = append(opts, media.WithRegexBlocklist(blocklistRe))
@@ -113,10 +113,10 @@ func init() {
 		false,
 		"Overwrite existing files on rename. WARN: Use with caution!")
 	sortCmd.Flags().BoolVar(&stopOnError, stopOnErrorFlagName, false, "Exit on first error")
-	sortCmd.Flags().StringArrayVar(&fileExts,
-		fileExtsFlagName,
+	sortCmd.Flags().StringArrayVar(&fileTypes,
+		fileTypesFlagName,
 		media.DefaultFileTypes,
-		"Allowlist of file extensions to match on")
+		"Allowlist of file types to match on. NOTE: When used in conjuction with mag-ext-in, then magic metadata may be used")
 	sortCmd.Flags().StringArrayVar(&blocklistRe,
 		blocklistRegexFlagName,
 		sliceReToString(media.DefaultBlocklist),
