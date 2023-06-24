@@ -32,6 +32,7 @@ type sorter struct {
 	useLastModifiedDate bool
 	useMagicSignature   bool
 	cleanFileExtensions bool
+	stopWalkOnError     bool
 
 	fileTypes            []string
 	directoryBlocklist   []*regexp.Regexp
@@ -51,7 +52,6 @@ func (s *sorter) Run(ctx context.Context) error {
 }
 
 func (s *sorter) traverseFunc(ctx context.Context) fs.WalkDirFunc {
-	ilog.FromContext(ctx).Debug("Returning walker")
 	return func(path string, info fs.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -64,7 +64,7 @@ func (s *sorter) traverseFunc(ctx context.Context) fs.WalkDirFunc {
 
 		if s.isBlockedDir(path) {
 			logger.Debug("Path in blocklist, so skipping...")
-			return nil
+			return fs.SkipDir
 		}
 
 		logger.Debug("Checking file.")
@@ -74,7 +74,10 @@ func (s *sorter) traverseFunc(ctx context.Context) fs.WalkDirFunc {
 		}
 
 		if err := s.handleFile(ctx, path); err != nil {
-			return err
+			logger.Error("Failed to handle file", zap.Error(err))
+			if s.stopWalkOnError {
+				return err
+			}
 		}
 
 		return nil
@@ -161,7 +164,7 @@ func (s *sorter) getOutputFile(ts time.Time, srcPath string) (string, error) {
 
 	ext, err := getExt(srcPath, s.cleanFileExtensions)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("%w: could not get file extension", err)
 	}
 	outFilename := filepath.Base(srcPath)
 	if s.timestampAsFilename {
@@ -184,7 +187,7 @@ func getExt(path string, useSignature bool) (string, error) {
 		ext = "." + t.Extension
 	}
 	if ext == "" {
-		return "", errors.New("no file extension on file")
+		return "", unknownMediaErr
 	}
 	return ext, nil
 }

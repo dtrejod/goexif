@@ -4,10 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/dtrejod/goexif/internal/ilog"
 	"github.com/dtrejod/goexif/internal/mediasorter"
 	"github.com/spf13/cobra"
-	"go.uber.org/zap"
 )
 
 const (
@@ -17,6 +15,7 @@ const (
 	tsAsFilenameFlagName    = "ts-as-filename"
 	modTimeFallbackFlagName = "mod-time-fallback"
 	magicSignatureFlagName  = "magic-sig"
+	stopOnErrorFlagName     = "quick-exit"
 	cleanFileExtFlagName    = "clean-ext"
 	fileExtsFlagName        = "extensions"
 )
@@ -29,6 +28,7 @@ var (
 	modTimeFallback bool
 	magicSignature  bool
 	cleanFileExt    bool
+	stopOnError     bool
 	fileExts        []string
 )
 
@@ -58,18 +58,19 @@ func shortRun(_ *cobra.Command, _ []string) {
 	if cleanFileExt {
 		opts = append(opts, mediasorter.WithCleanFileExtensions())
 	}
+	if stopOnError {
+		opts = append(opts, mediasorter.WithStopOnError())
+	}
 	if len(fileExts) > 0 {
 		opts = append(opts, mediasorter.WithFileTypes(fileExts))
 	}
 
 	s, err := mediasorter.NewSorter(ctx, opts...)
 	if err != nil {
-		ilog.FromContext(ctx).Error("Sorter configuration error.", zap.Error(err))
 		os.Exit(1)
 	}
 
 	if err := s.Run(ctx); err != nil {
-		ilog.FromContext(ctx).Error("Sorter encountered an error.", zap.Error(err))
 		os.Exit(1)
 	}
 
@@ -79,7 +80,7 @@ func shortRun(_ *cobra.Command, _ []string) {
 func init() {
 	sortCmd.Flags().StringVarP(&sourceDir, sourceDirFlagName, "s", "", "source directory to scan for media files")
 	sortCmd.Flags().StringVar(&destDir, destinationDirFlagName, "", "destination directory to move files into")
-	sortCmd.Flags().BoolVarP(&dryRun, dryRunFlagName, "n", false, "Do nothing, only show what would happen")
+	sortCmd.Flags().BoolVarP(&dryRun, dryRunFlagName, "n", true, "Do nothing, only show what would happen")
 	sortCmd.Flags().BoolVar(&tsAsFilename, tsAsFilenameFlagName, false, "Use timestamp as new filename")
 	sortCmd.Flags().BoolVar(&modTimeFallback,
 		modTimeFallbackFlagName,
@@ -90,6 +91,7 @@ func init() {
 		false,
 		"Ignore existing file extension and use magic signature instead")
 	sortCmd.Flags().BoolVar(&cleanFileExt, cleanFileExtFlagName, false, "Attempt to clean original file extension")
+	sortCmd.Flags().BoolVar(&stopOnError, stopOnErrorFlagName, false, "Exit on first error")
 	sortCmd.Flags().StringArrayVar(&fileExts,
 		fileExtsFlagName,
 		[]string{},

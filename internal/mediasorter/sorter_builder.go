@@ -3,6 +3,7 @@ package mediasorter
 import (
 	"context"
 	"errors"
+	"fmt"
 	"regexp"
 	"strings"
 
@@ -28,6 +29,7 @@ var (
 		regexp.MustCompile(`(\/)?slideshows\/`),
 		regexp.MustCompile(`(\/)?raw\/*`),
 	}
+	invalidConfigErr = errors.New("invalid configuration")
 )
 
 type Sorter interface {
@@ -51,6 +53,7 @@ type builderOptions struct {
 	useLastModifiedDate bool
 	useMagicSignature   bool
 	cleanFileExtensions bool
+	stopWalkOnError     bool
 
 	fileTypes          []string
 	directoryBlocklist []*regexp.Regexp
@@ -75,7 +78,9 @@ func NewSorter(ctx context.Context, opts ...Option) (Sorter, error) {
 	}
 
 	if cfg.sourceDirectory == nil {
-		return nil, errors.New("source directory required for sorting")
+		err := fmt.Errorf("%w: source directory required for sorting", invalidConfigErr)
+		ilog.FromContext(ctx).Error("Failed to build sorter", zap.Error(err))
+		return nil, err
 	}
 
 	ilog.FromContext(ctx).Info("Sorter configuration.", zap.Reflect("configuration", cfg))
@@ -85,6 +90,7 @@ func NewSorter(ctx context.Context, opts ...Option) (Sorter, error) {
 		useLastModifiedDate:  cfg.useLastModifiedDate,
 		useMagicSignature:    cfg.useMagicSignature,
 		cleanFileExtensions:  cfg.cleanFileExtensions,
+		stopWalkOnError:      cfg.stopWalkOnError,
 		fileTypes:            cfg.fileTypes,
 		directoryBlocklist:   cfg.directoryBlocklist,
 		sourceDirectory:      *cfg.sourceDirectory,
@@ -182,6 +188,14 @@ func WithSourceDirectory(s string) Option {
 func WithDestinationDirectory(d string) Option {
 	return builderFunc(func(b *builderOptions) error {
 		b.destinationDirectory = &d
+		return nil
+	})
+}
+
+// WithStopOnError instructs the sorter to exit quickly when any error occurs during walking the directory tree
+func WithStopOnError() Option {
+	return builderFunc(func(b *builderOptions) error {
+		b.stopWalkOnError = true
 		return nil
 	})
 }
