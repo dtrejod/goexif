@@ -21,11 +21,29 @@ jobs:
       with:
         go-version-file: go.mod
 
-    - name: Go Version
-      run: go version
+    - name: Verify dependencies
+      run: go mod verify
 
     - name: Build
       run: go build -v ./...
 
+    - name: Vet
+      run: go vet $(go list ./... | grep -v /vendor/)
+
+    - name: Install staticcheck
+      run: go install honnef.co/go/tools/cmd/staticcheck@latest
+
+    - name: Run staticcheck
+      run: staticcheck $(go list ./... | grep -v /vendor/)
+
+    - name: Install golint
+      run: go install golang.org/x/lint/golint@latest
+
+    - name: Run golint
+      run: golint $(go list ./... | grep -v /vendor/)
+
     - name: Test
       run: go test -v ./...
+
+  verify:
+

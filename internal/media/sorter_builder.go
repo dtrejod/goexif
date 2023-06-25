@@ -30,10 +30,12 @@ var (
 		// repeatedly processing the same media files
 		regexp.MustCompile(`(\/)?\d{4}\/(\d{2}\/){2}`),
 	}
-	invalidConfigErr = errors.New("invalid configuration")
+	errInvalidConfig = errors.New("invalid configuration")
 )
 
+// Sorter sorts media from file metadata
 type Sorter interface {
+	// Run runs the sorter
 	Run(ctx context.Context) error
 }
 
@@ -64,6 +66,8 @@ type builderOptions struct {
 	destinationDirectory *string
 }
 
+// NewSorter returns a sorter configured with the provided Option(s). The
+// WithSourceDirectory Option is the only required option.
 func NewSorter(ctx context.Context, opts ...Option) (Sorter, error) {
 	cfg := builderOptions{
 		fileTypes: uniqLoweredSlice(DefaultFileTypes),
@@ -80,7 +84,7 @@ func NewSorter(ctx context.Context, opts ...Option) (Sorter, error) {
 	}
 
 	if cfg.sourceDirectory == nil {
-		err := fmt.Errorf("%w: source directory required for sorting", invalidConfigErr)
+		err := fmt.Errorf("%w: source directory required for sorting", errInvalidConfig)
 		ilog.FromContext(ctx).Error("Failed to build sorter", zap.Error(err))
 		return nil, err
 	}
@@ -214,7 +218,7 @@ func WithStopOnError() Option {
 	})
 }
 
-// uniqLoweredSlice takes a slice, lowecases all elements, and return a resulting slice with only unique elements.
+// uniqLoweredSlice takes a slice, lowercases all elements, and return a resulting slice with only unique elements.
 func uniqLoweredSlice(in []string) []string {
 	m := make(map[string]struct{}, len(in))
 	for _, s := range in {

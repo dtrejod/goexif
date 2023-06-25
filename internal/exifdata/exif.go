@@ -20,6 +20,7 @@ var (
 	}
 )
 
+// GetExifTime returns the EXIF metadata Datetime from media referenced in the provided path
 func GetExifTime(path string) (time.Time, error) {
 	// get RoofIfd
 	rootIfd, err := getRootIfd(path)

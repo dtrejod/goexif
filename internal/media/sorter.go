@@ -23,8 +23,8 @@ const (
 )
 
 var (
-	unknownMediaErr = errors.New("unhandled media type")
-	runtimeErr      = errors.New("runtime error")
+	errUnknownMedia = errors.New("unhandled media type")
+	errRuntime      = errors.New("runtime error")
 )
 
 type sorter struct {
@@ -176,12 +176,12 @@ func (s *sorter) getFileTimestamp(path string) (ts time.Time, err error) {
 	}
 	// Only use exif metadata if the file is an image
 	if v := t.MIME.Type; v != "image" && v != "bitmap" {
-		return time.Time{}, fmt.Errorf("%w: %s", unknownMediaErr, v)
+		return time.Time{}, fmt.Errorf("%w: %s", errUnknownMedia, v)
 	}
 
 	ts, err = exifdata.GetExifTime(path)
 	if err != nil {
-		return time.Time{}, fmt.Errorf("%w: %w", runtimeErr, err)
+		return time.Time{}, fmt.Errorf("%w: %w", errRuntime, err)
 	}
 	return ts, nil
 }
@@ -202,7 +202,7 @@ func (s *sorter) getOutputFile(ts time.Time, srcPath string) (string, error) {
 		outFilename = strconv.FormatInt(ts.Unix(), 10)
 	}
 	if outFilename == "" {
-		return "", fmt.Errorf("%w: output file has no filename", runtimeErr)
+		return "", fmt.Errorf("%w: output file has no filename", errRuntime)
 	}
 	outFilename = outFilename + ext
 
@@ -219,7 +219,7 @@ func (s *sorter) handleOverwrite(ctx context.Context, path string) error {
 			// delete existing file it exists
 			return os.Remove(path)
 		}
-		return fmt.Errorf("%w: desired destination file already exists", runtimeErr)
+		return fmt.Errorf("%w: desired destination file already exists", errRuntime)
 	}
 	if errors.Is(err, os.ErrNotExist) {
 		return nil
@@ -240,7 +240,7 @@ func getExt(path string, useSignature bool) (string, error) {
 		ext = "." + t.Extension
 	}
 	if ext == "" {
-		return "", unknownMediaErr
+		return "", errUnknownMedia
 	}
 	return ext, nil
 }

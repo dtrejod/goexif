@@ -10,14 +10,12 @@ import (
 
 var (
 	ctx     context.Context
-	logger  *zap.Logger
 	debug   bool
 	rootCmd = &cobra.Command{
 		Use:               "goexif",
 		Short:             "A tool for interacting with media files via their exif/file metadata",
 		PersistentPreRunE: initLoggers,
 	}
-	debugFlagVal bool
 )
 
 func initLoggers(_ *cobra.Command, _ []string) error {
@@ -39,6 +37,7 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&debug, "debug", "d", false, "run in debug mode")
 }
 
+// Execute runs the root command tree
 func Execute() int {
 	if err := rootCmd.Execute(); err != nil {
 		ilog.FromContext(ctx).Error("goexif error", zap.Error(err))
