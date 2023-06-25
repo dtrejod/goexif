@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 	"regexp"
 
@@ -89,8 +88,6 @@ func shortRun(_ *cobra.Command, _ []string) {
 	if err := s.Run(ctx); err != nil {
 		os.Exit(1)
 	}
-
-	return
 }
 
 func init() {
@@ -125,7 +122,7 @@ func init() {
 	sortCmd.Flags().StringArrayVar(&blocklistRe,
 		blocklistRegexFlagName,
 		sliceReToString(media.DefaultBlocklist),
-		fmt.Sprintf("Regex blocklist that will skip"))
+		"Regex blocklist that will skip")
 
 	_ = sortCmd.MarkFlagRequired(sourceDirFlagName)
 	rootCmd.AddCommand(sortCmd)
