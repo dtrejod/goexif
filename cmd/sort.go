@@ -20,7 +20,7 @@ const (
 	magicSignatureInFlagName  = "magic-ext-in"
 	magicSignatureOutFlagName = "magic-ext-out"
 	fileTypesFlagName         = "file-types"
-	blocklistRegexFlagName    = "blocklist-regexes"
+	blocklistRegexFlagName    = "blocklist-re"
 )
 
 var (
@@ -73,7 +73,12 @@ func shortRun(_ *cobra.Command, _ []string) {
 		opts = append(opts, media.WithFileTypes(fileTypes))
 	}
 	if len(blocklistRe) > 0 {
-		opts = append(opts, media.WithRegexBlocklist(blocklistRe))
+		// gracefully handle the no regex case
+		if blocklistRe[0] == "" {
+			opts = append(opts, media.WithRegexBlocklist([]string{}))
+		} else {
+			opts = append(opts, media.WithRegexBlocklist(blocklistRe))
+		}
 	}
 
 	s, err := media.NewSorter(ctx, opts...)

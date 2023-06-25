@@ -3,59 +3,81 @@ package exifdata
 import (
 	"errors"
 	"os"
-	"strings"
 	"time"
 
-	"github.com/rwcarlsen/goexif/exif"
-	"github.com/rwcarlsen/goexif/mknote"
-	"github.com/rwcarlsen/goexif/tiff"
+	"github.com/dsoprea/go-exif/v3"
+	exifcommon "github.com/dsoprea/go-exif/v3/common"
 )
 
-func GetExifTime(filepath string) (time.Time, error) {
-	f, err := os.Open(filepath)
+const (
+	exifDateLayout = "2006:01:02 15:04:05"
+)
+
+var (
+	dateTags = []string{
+		"DateTimeOriginal",
+		"DateTimeDigitized",
+	}
+)
+
+func GetExifTime(path string) (time.Time, error) {
+	// get RoofIfd
+	rootIfd, err := getRootIfd(path)
 	if err != nil {
 		return time.Time{}, err
 	}
-	exif.RegisterParsers(mknote.All...)
 
-	x, err := exif.Decode(f)
+	exifIfd, err := exif.FindIfdFromRootIfd(rootIfd, "IFD/Exif")
+	if err != nil {
+		return time.Time{}, errors.New("IFD/Exif not found")
+	}
+
+	value, err := getTimeFromTag(exifIfd)
 	if err != nil {
 		return time.Time{}, err
 	}
 
-	tag, err := getDateTag(x)
-	if err != nil {
-		return time.Time{}, err
-	}
-
-	return formatDateFromTag(x, tag)
+	// Parse string into Time
+	// TODO: Parse timezone
+	return time.Parse(exifDateLayout, value)
 }
 
-func getDateTag(x *exif.Exif) (*tiff.Tag, error) {
-	tag, err := x.Get(exif.DateTimeOriginal)
-	if err == nil {
-		return tag, nil
+func getTimeFromTag(exifIfd *exif.Ifd) (value string, err error) {
+	for _, tag := range dateTags {
+		results, err := exifIfd.FindTagWithName(tag)
+		if err != nil {
+			continue
+		}
+		if len(results) == 1 {
+			return results[0].Format()
+		}
 	}
 
-	tag, err = x.Get(exif.DateTimeDigitized)
-	if err == nil {
-		return tag, nil
-	}
-
-	return nil, errors.New("could not parse date from tiff IFD tag")
+	return "", errors.New("could not find known IFD/Exif date tags")
 }
 
-// copied from upstream rwcarlsen/goexif pkg
-func formatDateFromTag(x *exif.Exif, tag *tiff.Tag) (time.Time, error) {
-	if tag.Format() != tiff.StringVal {
-		return time.Time{}, errors.New("DateTime[Original] not in string format")
+func getRootIfd(path string) (*exif.Ifd, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, err
 	}
-	exifTimeLayout := "2006:01:02 15:04:05"
-	dateStr := strings.TrimRight(string(tag.Val), "\x00")
-	// TODO(bradfitz,mpl): look for timezone offset, GPS time, etc.
-	timeZone := time.Local
-	if tz, _ := x.TimeZone(); tz != nil {
-		timeZone = tz
+	defer f.Close()
+
+	rawExif, err := exif.SearchAndExtractExifWithReader(f)
+	if err != nil {
+		return nil, err
 	}
-	return time.ParseInLocation(exifTimeLayout, dateStr, timeZone)
+
+	im, err := exifcommon.NewIfdMappingWithStandard()
+	if err != nil {
+		return nil, err
+	}
+	ti := exif.NewTagIndex()
+
+	_, index, err := exif.Collect(im, ti, rawExif)
+	if err != nil {
+		return nil, err
+	}
+
+	return index.RootIfd, nil
 }

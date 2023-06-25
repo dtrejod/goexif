@@ -74,7 +74,7 @@ func (s *sorter) traverseFunc(ctx context.Context) fs.WalkDirFunc {
 		}
 
 		logger.Debug("Checking file.")
-		if !s.isFileTypeMatch(path) {
+		if !s.isFileTypeMatch(ctx, path) {
 			logger.Debug("File did not match handled file types, so skipping...")
 			return nil
 		}
@@ -99,7 +99,7 @@ func (s *sorter) isBlocked(path string) bool {
 	return false
 }
 
-func (s *sorter) isFileTypeMatch(path string) bool {
+func (s *sorter) isFileTypeMatch(ctx context.Context, path string) bool {
 	ext, err := getExt(path, s.useMagicSignature)
 	if err != nil {
 		return false
@@ -111,6 +111,7 @@ func (s *sorter) isFileTypeMatch(path string) bool {
 		}
 	}
 
+	ilog.FromContext(ctx).Debug("Unhandled extension", zap.String("ext", ext))
 	return false
 }
 
@@ -129,16 +130,22 @@ func (s *sorter) handleFile(ctx context.Context, srcPath string) error {
 	}
 	logger = logger.With(zap.String("destinationPath", outPath))
 
-	if s.dryRun {
-		logger.Info("Dry run... Mock moving file.")
+	if srcPath == outPath {
+		logger.Info("Source and destination file match. Nothing to do.")
 		return nil
 	}
+
+	if s.dryRun {
+		logger.Info("Dry run, moving file...")
+		return nil
+	}
+	logger.Debug("Moving file...")
 
 	if err := s.handleOverwrite(ctx, outPath); err != nil {
 		return err
 	}
 
-	if err := os.MkdirAll(outPath, 0755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(outPath), 0755); err != nil {
 		return err
 	}
 
@@ -146,7 +153,7 @@ func (s *sorter) handleFile(ctx context.Context, srcPath string) error {
 		return err
 	}
 
-	logger.Info("Successfully renamed file.")
+	logger.Info("Successfully moved file.")
 	return nil
 }
 
@@ -214,11 +221,11 @@ func (s *sorter) handleOverwrite(ctx context.Context, path string) error {
 		}
 		return fmt.Errorf("%w: desired destination file already exists", runtimeErr)
 	}
-	if !errors.Is(err, os.ErrNotExist) {
-		// unknown error
-		return fmt.Errorf("%w: could not check if desired out file exist", err)
+	if errors.Is(err, os.ErrNotExist) {
+		return nil
 	}
-	return nil
+	// unknown error
+	return fmt.Errorf("%w: could not check if desired out file exist", err)
 }
 
 // getExt returns the file extension, using the magic signature if desired. The

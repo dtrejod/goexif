@@ -21,6 +21,7 @@ var (
 		"tiff",
 		"gif",
 		"xcf",
+		"heif",
 	}
 	// DefaultBlocklist are default regexes that are ignored by the sorter.
 	DefaultBlocklist = []*regexp.Regexp{
@@ -64,7 +65,7 @@ type builderOptions struct {
 }
 
 func NewSorter(ctx context.Context, opts ...Option) (Sorter, error) {
-	cfg := &builderOptions{
+	cfg := builderOptions{
 		fileTypes: uniqLoweredSlice(DefaultFileTypes),
 		blocklist: DefaultBlocklist,
 	}
@@ -73,7 +74,7 @@ func NewSorter(ctx context.Context, opts ...Option) (Sorter, error) {
 		if opt == nil {
 			continue
 		}
-		if err := opt.apply(cfg); err != nil {
+		if err := opt.apply(&cfg); err != nil {
 			return nil, err
 		}
 	}
@@ -84,7 +85,7 @@ func NewSorter(ctx context.Context, opts ...Option) (Sorter, error) {
 		return nil, err
 	}
 
-	ilog.FromContext(ctx).Info("Sorter configuration.", zap.Reflect("configuration", cfg))
+	ilog.FromContext(ctx).Info("Sorter configuration.", zap.String("configuration", fmt.Sprintf("%+v", cfg)))
 	return &sorter{
 		dryRun:               cfg.dryRun,
 		timestampAsFilename:  cfg.timestampAsFilename,
