@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	sourceDirFlagName         = "source-dir"
+	sourceDirFlagName         = "src-dir"
 	destinationDirFlagName    = "dest-dir"
 	dryRunFlagName            = "dry-run"
 	tsAsFilenameFlagName      = "ts-as-filename"
