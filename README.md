@@ -22,7 +22,7 @@ folder that uses the following convention:
 Example:
 ```
 # Input
-./image1.jpg 
+./image1.jpg
 ./image2.heic
 
 # goexif sort
@@ -30,7 +30,7 @@ $ ./goexif sort --src-dir . --dry-run=false
 
 # Output
 ./2023/01/01/image1.jpg
-./2023/01/01/image1.jpg
+./2023/02/01/image2.heic
 ```
 
 Reference the help text for the `sort` [command](./cmd/sort.go) for available options.
