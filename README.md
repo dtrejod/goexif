@@ -28,7 +28,7 @@ Example:
 # goexif sort
 $ ./goexif sort --src-dir . --dry-run=false
 
-# Output
+# Output - YYYY/MM/DD
 ./2023/01/01/image1.jpg
 ./2023/02/01/image2.heic
 ```
