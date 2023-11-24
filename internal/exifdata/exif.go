@@ -40,11 +40,7 @@ func GetExifTime(path string) (time.Time, error) {
 
 	// Parse string into Time
 	// TODO: Parse timezone
-	t, err := time.Parse(exifDateLayout, value)
-	if err != nil {
-		return time.Time{}, err
-	}
-	return t, nil
+	return time.Parse(exifDateLayout, value)
 }
 
 func getTimeFromTag(exifIfd *exif.Ifd) (value string, err error) {
