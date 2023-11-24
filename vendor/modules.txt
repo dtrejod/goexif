@@ -1,3 +1,8 @@
+# github.com/corona10/goimagehash v1.1.0
+## explicit
+github.com/corona10/goimagehash
+github.com/corona10/goimagehash/etcs
+github.com/corona10/goimagehash/transforms
 # github.com/dsoprea/go-exif/v3 v3.0.1
 ## explicit; go 1.12
 github.com/dsoprea/go-exif/v3
@@ -30,6 +35,9 @@ github.com/h2non/filetype/types
 github.com/inconshreveable/mousetrap
 # github.com/kr/pretty v0.1.0
 ## explicit
+# github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
+## explicit
+github.com/nfnt/resize
 # github.com/spf13/cobra v1.7.0
 ## explicit; go 1.15
 github.com/spf13/cobra

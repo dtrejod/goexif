@@ -16,6 +16,7 @@ const (
 	modTimeFallbackFlagName   = "fallback-mod-time"
 	overwriteExistingFlagName = "overwrite"
 	stopOnErrorFlagName       = "stop-on-err"
+	detectDuplicatesFlagName  = "detect-duplicates"
 	magicSignatureInFlagName  = "magic-ext-in"
 	magicSignatureOutFlagName = "magic-ext-out"
 	fileTypesFlagName         = "file-types"
@@ -29,6 +30,7 @@ var (
 	tsAsFilename      bool
 	modTimeFallback   bool
 	magicSignatureIn  bool
+	detectDuplicates  bool
 	overwrite         bool
 	magicSignatureOut bool
 	stopOnError       bool
@@ -61,6 +63,9 @@ func shortRun(_ *cobra.Command, _ []string) {
 	}
 	if magicSignatureOut {
 		opts = append(opts, media.WithGenOutputFileMagicSignature())
+	}
+	if detectDuplicates {
+		opts = append(opts, media.WithDetectDuplicates())
 	}
 	if overwrite {
 		opts = append(opts, media.WithOverwriteExisting())
@@ -102,6 +107,10 @@ func init() {
 		modTimeFallbackFlagName,
 		false,
 		"Fallback to using file modified time if no exif data is found")
+	sortCmd.Flags().BoolVar(&detectDuplicates,
+		detectDuplicatesFlagName,
+		false,
+		"Gracefully skip moving duplicate image when name conflict in destination directory")
 	sortCmd.Flags().BoolVar(&magicSignatureIn,
 		magicSignatureInFlagName,
 		false,
