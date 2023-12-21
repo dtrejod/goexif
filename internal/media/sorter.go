@@ -191,7 +191,7 @@ func (s *sorter) getFileTimestamp(path string) (ts time.Time, err error) {
 	if err != nil {
 		return time.Time{}, fmt.Errorf("%w: %w", errRuntime, err)
 	}
-	return ts, nil
+	return ts.UTC(), nil
 }
 
 func (s *sorter) getOutputFile(ts time.Time, srcPath string) (string, error) {
