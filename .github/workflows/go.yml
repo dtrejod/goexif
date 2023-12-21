@@ -29,9 +29,6 @@ jobs:
     - name: Verify dependencies
       run: go mod verify
 
-    - name: Build Validation
-      run: go build -v ./...
-
     - name: Vet
       run: go vet $(go list ./... | grep -v /vendor/)
 
@@ -46,6 +43,9 @@ jobs:
 
     - name: Run golint
       run: golint $(go list ./... | grep -v /vendor/)
+
+    - name: Compile
+      run: go build -v ./...
 
     - name: Test
       run: go test -v ./...
