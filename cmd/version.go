@@ -8,8 +8,9 @@ import (
 )
 
 var versionCmd = &cobra.Command{
-	Use: "version",
-	Run: versionRun,
+	Use:   "version",
+	Run:   versionRun,
+	Short: "Print the version",
 }
 
 func versionRun(_ *cobra.Command, _ []string) {

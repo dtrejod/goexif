@@ -24,7 +24,7 @@ jobs:
       run: go mod verify
 
     - name: Build Validation
-      run: go build -v -ldflags="-X 'version.Version=${{ github.ref_name }}'" -o ./goexif ./...
+      run: go build -v -ldflags="-X ${{ github.event.repository.name }}/version.version=${{ github.ref_name }}" -o ./bin/goexif
 
     - name: Print Version
       run: ./goexif version
@@ -61,26 +61,26 @@ jobs:
         go-version-file: go.mod
 
     - name: Build Darwin amd64
-      run: OS=darwin GOARCH=amd64 go build -v -ldflags="-X 'version.Version=${{ github.ref_name }}'" -o ./goexif-amd64-darwin ./...
+      run: OS=darwin GOARCH=amd64 go build -v -ldflags="-X ${{ github.event.repository.name }}/version.version=${{ github.ref_name }}" -o ./bin/goexif-amd64-darwin
 
     - name: Build Darwin arm64
-      run: OS=darwin GOARCH=arm64 go build -v -ldflags="-X 'version.Version=${{ github.ref_name }}'" -o ./goexif-arm64-darwin ./...
+      run: OS=darwin GOARCH=arm64 go build -v -ldflags="-X ${{ github.event.repository.name }}/version.version=${{ github.ref_name }}" -o ./bin/goexif-arm64-darwin
 
     - name: Build Linux amd64
-      run: OS=linux GOARCH=amd64 go build -v -ldflags="-X 'version.Version=${{ github.ref_name }}'" -o ./goexif-amd64-linux ./...
+      run: OS=linux GOARCH=amd64 go build -v -ldflags="-X ${{ github.event.repository.name }}/version.version=${{ github.ref_name }}" -o ./bin/goexif-amd64-linux
 
     - name: Build Linux arm64
-      run: OS=linux GOARCH=arm64 go build -v -ldflags="-X 'version.Version=${{ github.ref_name }}'" -o ./goexif-arm64-linux ./...
+      run: OS=linux GOARCH=arm64 go build -v -ldflags="-X ${{ github.event.repository.name }}/version.version=${{ github.ref_name }}" -o ./bin/goexif-arm64-linux
 
     - name: Build Windows amd64
-      run: OS=windows GOARCH=amd64 go build -v -ldflags="-X 'version.Version=${{ github.ref_name }}'"-o ./goexif-amd64-windows.exe ./...
+      run: OS=windows GOARCH=amd64 go build -v -ldflags="-X ${{ github.event.repository.name }}/version.version=${{ github.ref_name }}" -o ./bin/goexif-amd64-windows.exe
 
     - name: Release
       uses: softprops/action-gh-release@v1
       with:
         files: |
-          ./goexif-amd64-darwin
-          ./goexif-arm64-darwin
-          ./goexif-amd64-linux
-          ./goexif-arm64-linux
-          ./goexif-amd64-windows.exe
+          ./bin/goexif-amd64-darwin
+          ./bin/goexif-arm64-darwin
+          ./bin/goexif-amd64-linux
+          ./bin/goexif-arm64-linux
+          ./bin/goexif-amd64-windows.exe
