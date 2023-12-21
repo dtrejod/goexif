@@ -10,7 +10,7 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -23,7 +23,7 @@ jobs:
     - name: Verify dependencies
       run: go mod verify
 
-    - name: Build
+    - name: Build Validation
       run: go build -v ./...
 
     - name: Vet
