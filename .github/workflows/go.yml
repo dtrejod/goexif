@@ -74,19 +74,19 @@ jobs:
         go-version-file: go.mod
 
     - name: Build Darwin amd64
-      run: OS=darwin GOARCH=amd64 go build -v -ldflags="-X github.com/${{ github.repository }}/version.version=${{ github.ref_name }}" -o ./bin/${{ github.event.repository.name }}-amd64-darwin
+      run: GOOS=darwin GOARCH=amd64 go build -v -ldflags="-X github.com/${{ github.repository }}/version.version=${{ github.ref_name }}" -o ./bin/${{ github.event.repository.name }}-amd64-darwin
 
     - name: Build Darwin arm64
-      run: OS=darwin GOARCH=arm64 go build -v -ldflags="-X github.com/${{ github.repository }}/version.version=${{ github.ref_name }}" -o ./bin/${{ github.event.repository.name }}-arm64-darwin
+      run: GOOS=darwin GOARCH=arm64 go build -v -ldflags="-X github.com/${{ github.repository }}/version.version=${{ github.ref_name }}" -o ./bin/${{ github.event.repository.name }}-arm64-darwin
 
     - name: Build Linux amd64
-      run: OS=linux GOARCH=amd64 go build -v -ldflags="-X github.com/${{ github.repository }}/version.version=${{ github.ref_name }}" -o ./bin/${{ github.event.repository.name }}-amd64-linux
+      run: GOOS=linux GOARCH=amd64 go build -v -ldflags="-X github.com/${{ github.repository }}/version.version=${{ github.ref_name }}" -o ./bin/${{ github.event.repository.name }}-amd64-linux
 
     - name: Build Linux arm64
-      run: OS=linux GOARCH=arm64 go build -v -ldflags="-X github.com/${{ github.repository }}/version.version=${{ github.ref_name }}" -o ./bin/${{ github.event.repository.name }}-arm64-linux
+      run: GOOS=linux GOARCH=arm64 go build -v -ldflags="-X github.com/${{ github.repository }}/version.version=${{ github.ref_name }}" -o ./bin/${{ github.event.repository.name }}-arm64-linux
 
     - name: Build Windows amd64
-      run: OS=windows GOARCH=amd64 go build -v -ldflags="-X github.com/${{ github.repository }}/version.version=${{ github.ref_name }}" -o ./bin/${{ github.event.repository.name }}-amd64-windows.exe
+      run: GOOS=windows GOARCH=amd64 go build -v -ldflags="-X github.com/${{ github.repository }}/version.version=${{ github.ref_name }}" -o ./bin/${{ github.event.repository.name }}-amd64-windows.exe
 
     - name: Release
       uses: softprops/action-gh-release@v1
