@@ -24,7 +24,7 @@ jobs:
       run: go mod verify
 
     - name: Build Validation
-      run: go build -v -ldflags="-X 'version.Version=${{ github.ref_name }}'" -o goexif ./...
+      run: go build -v -ldflags="-X 'version.Version=${{ github.ref_name }}'" -o ./goexif ./...
 
     - name: Print Version
       run: ./goexif version
