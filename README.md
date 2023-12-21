@@ -1,8 +1,7 @@
-<p align=right>
-![Build Status](https://github.com/dtrejod/goexif/actions/workflows/go.yml/badge.svg)
-</p>
-
 # goexif
+
+![Build Status](https://github.com/dtrejod/goexif/actions/workflows/go.yml/badge.svg)
+
 
 The following is a Go based EXIF CLI tool.
 
