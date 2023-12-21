@@ -36,3 +36,11 @@ Reference the help text for the `sort` [command](./cmd/sort.go) for available op
 ```
 ./goexif sort --help
 ```
+
+## Similar Projects
+
+Other similar projects on Github:
+- https://github.com/ivandokov/phockup
+- https://github.com/timrc/exifsort
+- https://github.com/matchstick/exifsort
+- https://github.com/tommybutler/exifsort
