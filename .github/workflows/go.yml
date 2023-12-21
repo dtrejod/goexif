@@ -30,10 +30,7 @@ jobs:
       run: go mod verify
 
     - name: Build Validation
-      run: go build -v -ldflags="-X github.com/${{ github.repository }}/version.version=${{ github.ref_name }}" -o ./bin/${{ github.event.repository.name }}
-
-    - name: Print Version
-      run: ./bin/${{ github.event.repository.name }} version
+      run: go build -v ./...
 
     - name: Vet
       run: go vet $(go list ./... | grep -v /vendor/)
