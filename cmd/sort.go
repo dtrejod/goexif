@@ -14,7 +14,7 @@ const (
 	dryRunFlagName            = "dry-run"
 	tsAsFilenameFlagName      = "ts-as-filename"
 	modTimeFallbackFlagName   = "fallback-mod-time"
-	overwriteExistingFlagName = "overwrite"
+	forceFlagName             = "force"
 	stopOnErrorFlagName       = "stop-on-err"
 	detectDuplicatesFlagName  = "detect-duplicates"
 	magicSignatureInFlagName  = "magic-ext-in"
@@ -31,7 +31,7 @@ var (
 	modTimeFallback   bool
 	magicSignatureIn  bool
 	detectDuplicates  bool
-	overwrite         bool
+	force             bool
 	magicSignatureOut bool
 	stopOnError       bool
 	fileTypes         []string
@@ -67,7 +67,7 @@ func shortRun(_ *cobra.Command, _ []string) {
 	if detectDuplicates {
 		opts = append(opts, media.WithDetectDuplicates())
 	}
-	if overwrite {
+	if force {
 		opts = append(opts, media.WithOverwriteExisting())
 	}
 	if stopOnError {
@@ -119,10 +119,10 @@ func init() {
 		magicSignatureOutFlagName,
 		false,
 		"Ignore existing file extension and use magic signature instead when generating new destination path")
-	sortCmd.Flags().BoolVar(&overwrite,
-		overwriteExistingFlagName,
+	sortCmd.Flags().BoolVar(&force,
+		forceFlagName,
 		false,
-		"Overwrite existing files on rename. WARN: Use with caution!")
+		"Force overwrite any existing media on naming collision WARN: Use with caution!")
 	sortCmd.Flags().BoolVar(&stopOnError, stopOnErrorFlagName, false, "Exit on first error")
 	sortCmd.Flags().StringArrayVar(&fileTypes,
 		fileTypesFlagName,
