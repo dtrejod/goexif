@@ -24,7 +24,10 @@ jobs:
       run: go mod verify
 
     - name: Build Validation
-      run: go build -v ./...
+      run: go build -v ./... -ldflags="-X 'version.Version=${{ github.ref_name }}'" -o bin/goexif
+
+    - name: Print Version
+      run: ./bin/goexif version
 
     - name: Vet
       run: go vet $(go list ./... | grep -v /vendor/)
@@ -58,19 +61,19 @@ jobs:
         go-version-file: go.mod
 
     - name: Build Darwin amd64
-      run: OS=darwin GOARCH=amd64 go build -v ./...  -o bin/goexif-amd64-darwin
+      run: OS=darwin GOARCH=amd64 go build -v ./...  -o bin/goexif-amd64-darwin -ldflags="-X 'version.Version=${{ github.ref_name }}'"
 
     - name: Build Darwin arm64
-      run: OS=darwin GOARCH=arm64 go build -v ./...  -o bin/goexif-arm64-darwin
+      run: OS=darwin GOARCH=arm64 go build -v ./...  -o bin/goexif-arm64-darwin -ldflags="-X 'version.Version=${{ github.ref_name }}'"
 
     - name: Build Linux amd64
-      run: OS=linux GOARCH=amd64 go build -v ./...  -o bin/goexif-amd64-linux
+      run: OS=linux GOARCH=amd64 go build -v ./...  -o bin/goexif-amd64-linux -ldflags="-X 'version.Version=${{ github.ref_name }}'"
 
     - name: Build Linux arm64
-      run: OS=linux GOARCH=arm64 go build -v ./...  -o bin/goexif-arm64-linux
+      run: OS=linux GOARCH=arm64 go build -v ./...  -o bin/goexif-arm64-linux -ldflags="-X 'version.Version=${{ github.ref_name }}'"
 
     - name: Build Windows amd64
-      run: OS=windows GOARCH=amd64 go build -v ./...  -o bin/goexif-amd64-windows.exe
+      run: OS=windows GOARCH=amd64 go build -v ./...  -o bin/goexif-amd64-windows.exe -ldflags="-X 'version.Version=${{ github.ref_name }}'"
 
     - name: Release
       uses: softprops/action-gh-release@v1
