@@ -27,7 +27,7 @@ jobs:
       run: go build -v -ldflags="-X ${{ github.event.repository.name }}/version.version=${{ github.ref_name }}" -o ./bin/goexif
 
     - name: Print Version
-      run: ./goexif version
+      run: ./bin/goexif version
 
     - name: Vet
       run: go vet $(go list ./... | grep -v /vendor/)
