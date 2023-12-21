@@ -58,6 +58,7 @@ type builderOptions struct {
 	cleanFileExtensions bool
 	overwriteExisting   bool
 	stopWalkOnError     bool
+	detectDuplicates    bool
 
 	fileTypes []string
 	blocklist []*regexp.Regexp
@@ -95,6 +96,7 @@ func NewSorter(ctx context.Context, opts ...Option) (Sorter, error) {
 		timestampAsFilename:  cfg.timestampAsFilename,
 		useLastModifiedDate:  cfg.useLastModifiedDate,
 		useMagicSignature:    cfg.useMagicSignature,
+		detectDuplicates:     cfg.detectDuplicates,
 		cleanFileExtensions:  cfg.cleanFileExtensions,
 		overwriteExisting:    cfg.overwriteExisting,
 		stopWalkOnError:      cfg.stopWalkOnError,
@@ -214,6 +216,15 @@ func WithOverwriteExisting() Option {
 func WithStopOnError() Option {
 	return builderFunc(func(b *builderOptions) error {
 		b.stopWalkOnError = true
+		return nil
+	})
+}
+
+// WithDetectDuplicates will use perception hash algorithm of each file to
+// determine whether to images with the same EXIF metadata are duplicate files.
+func WithDetectDuplicates() Option {
+	return builderFunc(func(b *builderOptions) error {
+		b.detectDuplicates = true
 		return nil
 	})
 }

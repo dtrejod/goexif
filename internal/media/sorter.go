@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"image"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -12,6 +13,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/corona10/goimagehash"
 	"github.com/dtrejod/goexif/internal/exifdata"
 	"github.com/dtrejod/goexif/internal/ilog"
 	"github.com/h2non/filetype"
@@ -32,6 +34,7 @@ type sorter struct {
 	timestampAsFilename bool
 	useLastModifiedDate bool
 	useMagicSignature   bool
+	detectDuplicates    bool
 	cleanFileExtensions bool
 	stopWalkOnError     bool
 	overwriteExisting   bool
@@ -135,16 +138,21 @@ func (s *sorter) handleFile(ctx context.Context, srcPath string) error {
 		return nil
 	}
 
+	skip, err := s.shouldSkip(ctx, srcPath, outPath)
+	if err != nil {
+		return err
+	}
+	if skip {
+		ilog.FromContext(ctx).Info("Skipping file...")
+		return nil
+	}
+
 	if s.dryRun {
 		logger.Info("Dry run, moving file...")
 		return nil
 	}
+
 	logger.Debug("Moving file...")
-
-	if err := s.handleOverwrite(ctx, outPath); err != nil {
-		return err
-	}
-
 	if err := os.MkdirAll(filepath.Dir(outPath), 0755); err != nil {
 		return err
 	}
@@ -209,23 +217,88 @@ func (s *sorter) getOutputFile(ts time.Time, srcPath string) (string, error) {
 	return filepath.Join(outDir, outFilename), nil
 }
 
-func (s *sorter) handleOverwrite(ctx context.Context, path string) error {
-	_, err := os.Stat(path)
-	if err == nil {
-		// file exists
-		if s.overwriteExisting {
-			ilog.FromContext(ctx).Info("Overwrite flag set. Removing existing file.",
-				zap.String("path", path))
-			// delete existing file it exists
-			return os.Remove(path)
-		}
-		return fmt.Errorf("%w: desired destination file already exists", errRuntime)
-	}
+func (s *sorter) shouldSkip(ctx context.Context, srcPath, outPath string) (bool, error) {
+	_, err := os.Stat(outPath)
 	if errors.Is(err, os.ErrNotExist) {
-		return nil
+		return false, nil
 	}
-	// unknown error
-	return fmt.Errorf("%w: could not check if desired out file exist", err)
+	if err != nil {
+		return false, fmt.Errorf("%w: could not check if desired out file exist", err)
+	}
+
+	// file exists. Handle gracefully...
+	if s.detectDuplicates {
+		isDuplicate, err := s.isDuplicateImage(ctx, srcPath, outPath)
+		if err != nil {
+			return false, fmt.Errorf("%w: failed to detect if images are duplicate", err)
+		}
+		if isDuplicate {
+			ilog.FromContext(ctx).Info("Detected duplicate image.")
+			return true, nil
+		}
+	}
+
+	if s.overwriteExisting && !s.dryRun {
+		ilog.FromContext(ctx).Info("Overwrite flag set. Removing existing file.",
+			zap.String("outPath", outPath))
+		return false, os.Remove(outPath)
+	}
+	return false, fmt.Errorf("%w: desired output filename collision", errRuntime)
+}
+
+func (s *sorter) isDuplicateImage(ctx context.Context, srcPath, outPath string) (bool, error) {
+	logger := ilog.FromContext(ctx).With(
+		zap.String("sourcePath", srcPath),
+		zap.String("destinationPath", outPath))
+
+	logger.Info("Detecting if images are duplicates...")
+	hashA, err := getImagePerceptionHash(srcPath)
+	if err != nil {
+		return false, err
+	}
+
+	hashB, err := getImagePerceptionHash(outPath)
+	if err != nil {
+		return false, err
+	}
+
+	distance, err := hashA.Distance(hashB)
+	if err != nil {
+		return false, fmt.Errorf("%w: failed to compare images for duplicates", err)
+	}
+
+	logger.Debug("Comparing images...",
+		zap.String("hashA", hashA.ToString()),
+		zap.String("hashB", hashB.ToString()),
+		zap.Int("distance", distance))
+
+	// A hash distance > 50 is the threshold for different images.
+	return distance < 25, nil
+}
+
+// getImagePerceptionHash returns the peception hash of the image. The phash is
+// taken first performing a discrete cosine transform on the image. Then it
+// compares each pixel to it's average. If it is larger then output 1 else 0
+// otherwise.
+// Since a Phash operates in the frequency domain, it should be more tolerant
+// to color shifts, size scaling, watermarks, and compression between 2 images.
+func getImagePerceptionHash(path string) (*goimagehash.ImageHash, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, fmt.Errorf("%w: failed to open image", err)
+	}
+
+	// Noteably image.Decode does not work with HEIF encoded images
+	img, _, err := image.Decode(f)
+	if err != nil {
+		return nil, fmt.Errorf("%w: failed to decode image", err)
+	}
+
+	hashA, err := goimagehash.PerceptionHash(img)
+	if err != nil {
+		return nil, fmt.Errorf("%w: failed to get perception hash image", err)
+	}
+	return hashA, nil
 }
 
 // getExt returns the file extension, using the magic signature if desired. The
