@@ -27,11 +27,12 @@ type traverser struct {
 
 // Run implements Sorter
 func (t *traverser) Run(ctx context.Context) error {
-	ilog.FromContext(ctx).Info("Sorting media files in directory.", zap.String("directory", t.sourceDirectory))
+	ilog.FromContext(ctx).Info("Performing pre-scan for media files...", zap.String("directory", t.sourceDirectory))
 	if err := filepath.WalkDir(t.sourceDirectory, t.traverseFunc(ctx, true)); err != nil {
 		return err
 	}
 
+	ilog.FromContext(ctx).Info("Sorting media files in directory...", zap.String("directory", t.sourceDirectory))
 	if err := filepath.WalkDir(t.sourceDirectory, t.traverseFunc(ctx, false)); err != nil {
 		return err
 	}
