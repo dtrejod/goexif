@@ -20,14 +20,19 @@ type traverser struct {
 	blocklist              []*regexp.Regexp
 	useInputMagicSignature bool
 
-	fileHandler    *metadataFileHandler
-	extVisitorFunc mediatype.VisitorFunc[map[string]struct{}]
+	fileHandler     *metadataFileHandler
+	progressTracker *progressTracker
+	extVisitorFunc  mediatype.VisitorFunc[map[string]struct{}]
 }
 
 // Run implements Sorter
 func (t *traverser) Run(ctx context.Context) error {
 	ilog.FromContext(ctx).Info("Sorting media files in directory.", zap.String("directory", t.sourceDirectory))
-	if err := filepath.WalkDir(t.sourceDirectory, t.traverseFunc(ctx)); err != nil {
+	if err := filepath.WalkDir(t.sourceDirectory, t.traverseFunc(ctx, true)); err != nil {
+		return err
+	}
+
+	if err := filepath.WalkDir(t.sourceDirectory, t.traverseFunc(ctx, false)); err != nil {
 		return err
 	}
 
@@ -35,7 +40,7 @@ func (t *traverser) Run(ctx context.Context) error {
 	return nil
 }
 
-func (t *traverser) traverseFunc(ctx context.Context) fs.WalkDirFunc {
+func (t *traverser) traverseFunc(ctx context.Context, isPreRun bool) fs.WalkDirFunc {
 	return func(path string, info fs.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -74,6 +79,12 @@ func (t *traverser) traverseFunc(ctx context.Context) fs.WalkDirFunc {
 			return nil
 		}
 
+		if isPreRun {
+			t.progressTracker.handle(ctx, true)
+			return nil
+		}
+
+		t.progressTracker.handle(ctx, false)
 		if err := t.fileHandler.handle(ctx, srcMedia); err != nil {
 			logger.Warn("Failed to handle file.", zap.Error(err))
 			if t.stopWalkOnError {
