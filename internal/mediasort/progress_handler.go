@@ -34,5 +34,4 @@ func (s *progressTracker) handle(ctx context.Context, isAccumulating bool) {
 			zap.Int("total", s.totalMediaFiles),
 			zap.Int("percentage", percentageComplete))
 	}
-	return
 }
