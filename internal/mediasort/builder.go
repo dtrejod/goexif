@@ -97,6 +97,10 @@ func NewSorter(ctx context.Context, opts ...Option) (Sorter, error) {
 		sourceDirectory:        *cfg.sourceDirectory,
 
 		extVisitorFunc: visitors.NewMediaExtAliases(ctx),
+		progressTracker: &progressTracker{
+			currentMediaIndex: 0,
+			totalMediaFiles:   0,
+		},
 		fileHandler: &metadataFileHandler{
 			useInputMagicSignature: cfg.useInputMagicSignature,
 			detectDuplicates:       cfg.detectDuplicates,
