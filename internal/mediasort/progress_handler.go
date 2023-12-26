@@ -36,9 +36,9 @@ func (s *progressTracker) handle(ctx context.Context, isAccumulating bool) {
 		s.logNextThreshold = s.logThreshold
 	}
 
-	// Log Progress every logPercent
+	// Log Progress every logPercent and at the very beginning and end
 	if s.currentMediaIndex == 1 || s.currentMediaIndex == s.logNextThreshold || s.currentMediaIndex == s.totalMediaFiles {
-		// double threshold every time we hit the the threshold
+		// double threshold every time we hit the threshold
 		if s.currentMediaIndex == s.logNextThreshold {
 			s.logNextThreshold += s.logThreshold
 		}
