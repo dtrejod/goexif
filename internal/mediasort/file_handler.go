@@ -53,7 +53,7 @@ func (s *metadataFileHandler) handle(ctx context.Context, srcMedia mediatype.For
 	}
 
 	if s.dryRun {
-		logger.Info("Dry run, moving file...")
+		logger.Info("Dry run, moving file...", zap.String("outPath", outPath))
 		return nil
 	}
 
