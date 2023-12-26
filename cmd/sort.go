@@ -4,7 +4,7 @@ import (
 	"os"
 	"regexp"
 
-	"github.com/dtrejod/goexif/internal/media"
+	"github.com/dtrejod/goexif/internal/mediasort"
 	"github.com/spf13/cobra"
 )
 
@@ -40,52 +40,52 @@ var (
 
 var sortCmd = &cobra.Command{
 	Use:   "sort",
-	Short: "Sort media files from their exif/file metadata",
+	Short: "Sort mediasort files from their exif/file metadata",
 	Run:   shortRun,
 }
 
 func shortRun(_ *cobra.Command, _ []string) {
-	opts := []media.Option{media.WithSourceDirectory(sourceDir)}
+	opts := []mediasort.Option{mediasort.WithSourceDirectory(sourceDir)}
 	if destDir != "" {
-		opts = append(opts, media.WithDestinationDirectory(destDir))
+		opts = append(opts, mediasort.WithDestinationDirectory(destDir))
 	}
 	if dryRun {
-		opts = append(opts, media.WithDryRun())
+		opts = append(opts, mediasort.WithDryRun())
 	}
 	if tsAsFilename {
-		opts = append(opts, media.WithTimestampAsFilename())
+		opts = append(opts, mediasort.WithTimestampAsFilename())
 	}
 	if modTimeFallback {
-		opts = append(opts, media.WithLastModifiedFallback())
+		opts = append(opts, mediasort.WithLastModifiedFallback())
 	}
 	if magicSignatureIn {
-		opts = append(opts, media.WithIdentifyFileMagicSignature())
+		opts = append(opts, mediasort.WithIdentifyFileMagicSignature())
 	}
 	if magicSignatureOut {
-		opts = append(opts, media.WithGenOutputFileMagicSignature())
+		opts = append(opts, mediasort.WithGenOutputFileMagicSignature())
 	}
 	if detectDuplicates {
-		opts = append(opts, media.WithDetectDuplicates())
+		opts = append(opts, mediasort.WithDetectDuplicates())
 	}
 	if force {
-		opts = append(opts, media.WithOverwriteExisting())
+		opts = append(opts, mediasort.WithOverwriteExisting())
 	}
 	if stopOnError {
-		opts = append(opts, media.WithStopOnError())
+		opts = append(opts, mediasort.WithStopOnError())
 	}
 	if len(fileTypes) > 0 {
-		opts = append(opts, media.WithFileTypes(fileTypes))
+		opts = append(opts, mediasort.WithFileTypes(fileTypes))
 	}
 	if len(blocklistRe) > 0 {
 		// gracefully handle the no regex case
 		if blocklistRe[0] == "" {
-			opts = append(opts, media.WithRegexBlocklist([]string{}))
+			opts = append(opts, mediasort.WithRegexBlocklist([]string{}))
 		} else {
-			opts = append(opts, media.WithRegexBlocklist(blocklistRe))
+			opts = append(opts, mediasort.WithRegexBlocklist(blocklistRe))
 		}
 	}
 
-	s, err := media.NewSorter(ctx, opts...)
+	s, err := mediasort.NewSorter(ctx, opts...)
 	if err != nil {
 		os.Exit(1)
 	}
@@ -126,11 +126,11 @@ func init() {
 	sortCmd.Flags().BoolVar(&stopOnError, stopOnErrorFlagName, false, "Exit on first error")
 	sortCmd.Flags().StringArrayVar(&fileTypes,
 		fileTypesFlagName,
-		media.DefaultFileTypes,
+		mediasort.DefaultFileTypes,
 		"Allowlist of file types to match on. NOTE: When used in conjuction with mag-ext-in, then magic metadata may be used")
 	sortCmd.Flags().StringArrayVar(&blocklistRe,
 		blocklistRegexFlagName,
-		sliceReToString(media.DefaultBlocklist),
+		sliceReToString(mediasort.DefaultBlocklist),
 		"Regex blocklist that will skip")
 
 	_ = sortCmd.MarkFlagRequired(sourceDirFlagName)

@@ -1,4 +1,4 @@
-package media
+package mediasort
 
 import (
 	"context"
@@ -8,19 +8,17 @@ import (
 	"strings"
 
 	"github.com/dtrejod/goexif/internal/ilog"
+	"github.com/dtrejod/goexif/internal/visitors"
 	"go.uber.org/zap"
 )
 
 var (
 	// DefaultFileTypes are the default media types handled by the sorter if none are specified.
+	// NOTE: This default list should match the known mediatypes in the ./internal/mediatype package.
 	DefaultFileTypes = []string{
 		"jpg",
 		"jpeg",
 		"png",
-		"tif",
-		"tiff",
-		"gif",
-		"xcf",
 		"heif",
 	}
 	// DefaultBlocklist are default regexes that are ignored by the sorter.
@@ -39,7 +37,7 @@ type Sorter interface {
 	Run(ctx context.Context) error
 }
 
-// Option is a param that can be used to configure the exif sorter.
+// Option is a param that can be used to configure the media metadata sorter.
 type Option interface {
 	apply(*builderOptions) error
 }
@@ -60,8 +58,8 @@ type builderOptions struct {
 	stopWalkOnError     bool
 	detectDuplicates    bool
 
-	fileTypes []string
-	blocklist []*regexp.Regexp
+	allowedFileTypes []string
+	blocklist        []*regexp.Regexp
 
 	sourceDirectory      *string
 	destinationDirectory *string
@@ -71,8 +69,8 @@ type builderOptions struct {
 // WithSourceDirectory Option is the only required option.
 func NewSorter(ctx context.Context, opts ...Option) (Sorter, error) {
 	cfg := builderOptions{
-		fileTypes: uniqLoweredSlice(DefaultFileTypes),
-		blocklist: DefaultBlocklist,
+		allowedFileTypes: uniqLoweredSlice(DefaultFileTypes),
+		blocklist:        DefaultBlocklist,
 	}
 
 	for _, opt := range opts {
@@ -91,19 +89,27 @@ func NewSorter(ctx context.Context, opts ...Option) (Sorter, error) {
 	}
 
 	ilog.FromContext(ctx).Info("Sorter configuration.", zap.String("configuration", fmt.Sprintf("%+v", cfg)))
-	return &sorter{
-		dryRun:               cfg.dryRun,
-		timestampAsFilename:  cfg.timestampAsFilename,
-		useLastModifiedDate:  cfg.useLastModifiedDate,
-		useMagicSignature:    cfg.useMagicSignature,
-		detectDuplicates:     cfg.detectDuplicates,
-		cleanFileExtensions:  cfg.cleanFileExtensions,
-		overwriteExisting:    cfg.overwriteExisting,
-		stopWalkOnError:      cfg.stopWalkOnError,
-		fileTypes:            cfg.fileTypes,
-		blocklist:            cfg.blocklist,
-		sourceDirectory:      *cfg.sourceDirectory,
-		destinationDirectory: cfg.destinationDirectory,
+	return &traverser{
+		useMagicSignature: cfg.useMagicSignature,
+		stopWalkOnError:   cfg.stopWalkOnError,
+		allowedFileTypes:  cfg.allowedFileTypes,
+		blocklist:         cfg.blocklist,
+		sourceDirectory:   *cfg.sourceDirectory,
+
+		extVisitorFunc: visitors.NewMediaExtAliases(ctx),
+		fileHandler: &metadataFileHandler{
+			useMagicSignature: cfg.useMagicSignature,
+			detectDuplicates:  cfg.detectDuplicates,
+			dryRun:            cfg.dryRun,
+			overwriteExisting: cfg.overwriteExisting,
+			mediaMetadataVisitorFunc: visitors.NewMediaMetadataFilename(
+				ctx,
+				cfg.destinationDirectory,
+				cfg.useLastModifiedDate,
+				cfg.timestampAsFilename,
+				cfg.cleanFileExtensions,
+			),
+		},
 	}, nil
 }
 
@@ -125,8 +131,8 @@ func WithTimestampAsFilename() Option {
 }
 
 // WithLastModifiedFallback instructs the sorter to fallback to using the
-// file's last modified date if there is no exif data. If false, images without
-// exif data are ignored
+// file's last modified date if there is no media metadata. If false, images without
+// media metadata data are ignored
 func WithLastModifiedFallback() Option {
 	return builderFunc(func(b *builderOptions) error {
 		b.useLastModifiedDate = true
@@ -159,7 +165,7 @@ func WithGenOutputFileMagicSignature() Option {
 // Can handle any file type; not just EXIF-enabled file types when used in conjunction with WithUseLastModifiedDate().
 func WithFileTypes(t []string) Option {
 	return builderFunc(func(b *builderOptions) error {
-		b.fileTypes = uniqLoweredSlice(t)
+		b.allowedFileTypes = uniqLoweredSlice(t)
 		return nil
 	})
 }
