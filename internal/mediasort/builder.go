@@ -49,14 +49,14 @@ func (f builderFunc) apply(b *builderOptions) error {
 }
 
 type builderOptions struct {
-	dryRun              bool
-	timestampAsFilename bool
-	useLastModifiedDate bool
-	useMagicSignature   bool
-	cleanFileExtensions bool
-	overwriteExisting   bool
-	stopWalkOnError     bool
-	detectDuplicates    bool
+	dryRun                  bool
+	timestampAsFilename     bool
+	useLastModifiedDate     bool
+	useInputMagicSignature  bool
+	useOutputMagicSignature bool
+	overwriteExisting       bool
+	stopWalkOnError         bool
+	detectDuplicates        bool
 
 	allowedFileTypes []string
 	blocklist        []*regexp.Regexp
@@ -90,24 +90,24 @@ func NewSorter(ctx context.Context, opts ...Option) (Sorter, error) {
 
 	ilog.FromContext(ctx).Info("Sorter configuration.", zap.String("configuration", fmt.Sprintf("%+v", cfg)))
 	return &traverser{
-		useMagicSignature: cfg.useMagicSignature,
-		stopWalkOnError:   cfg.stopWalkOnError,
-		allowedFileTypes:  cfg.allowedFileTypes,
-		blocklist:         cfg.blocklist,
-		sourceDirectory:   *cfg.sourceDirectory,
+		useInputMagicSignature: cfg.useInputMagicSignature,
+		stopWalkOnError:        cfg.stopWalkOnError,
+		allowedFileTypes:       cfg.allowedFileTypes,
+		blocklist:              cfg.blocklist,
+		sourceDirectory:        *cfg.sourceDirectory,
 
 		extVisitorFunc: visitors.NewMediaExtAliases(ctx),
 		fileHandler: &metadataFileHandler{
-			useMagicSignature: cfg.useMagicSignature,
-			detectDuplicates:  cfg.detectDuplicates,
-			dryRun:            cfg.dryRun,
-			overwriteExisting: cfg.overwriteExisting,
+			useInputMagicSignature: cfg.useInputMagicSignature,
+			detectDuplicates:       cfg.detectDuplicates,
+			dryRun:                 cfg.dryRun,
+			overwriteExisting:      cfg.overwriteExisting,
 			mediaMetadataVisitorFunc: visitors.NewMediaMetadataFilename(
 				ctx,
 				cfg.destinationDirectory,
 				cfg.useLastModifiedDate,
 				cfg.timestampAsFilename,
-				cfg.cleanFileExtensions,
+				cfg.useOutputMagicSignature,
 			),
 		},
 	}, nil
@@ -140,22 +140,21 @@ func WithLastModifiedFallback() Option {
 	})
 }
 
-// WithIdentifyFileMagicSignature instructs the sorter to idenitify media files using the
-// file's magic signature. If set, then files are renamed to the approriate
-// extension accordingly.
+// WithInputFileMagicSignature instructs the sorter to idenitify media files using the
+// file's magic signature ignoring the exisiting file extension on the media.
 // See the manual page for file(1) to understand how this works.
-func WithIdentifyFileMagicSignature() Option {
+func WithInputFileMagicSignature() Option {
 	return builderFunc(func(b *builderOptions) error {
-		b.useMagicSignature = true
+		b.useInputMagicSignature = true
 		return nil
 	})
 }
 
-// WithGenOutputFileMagicSignature will cause media file extensions to be consistent.
-// For example, .jpeg will be renamed to .jpg
-func WithGenOutputFileMagicSignature() Option {
+// WithOutputFileMagicSignature instructs the sorter to use the known file signature when saving the output file.
+// See the manual page for file(1) to understand how this works.
+func WithOutputFileMagicSignature() Option {
 	return builderFunc(func(b *builderOptions) error {
-		b.cleanFileExtensions = true
+		b.useOutputMagicSignature = true
 		return nil
 	})
 }

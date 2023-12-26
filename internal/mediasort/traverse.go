@@ -15,10 +15,10 @@ import (
 type traverser struct {
 	sourceDirectory string
 
-	stopWalkOnError   bool
-	allowedFileTypes  []string
-	blocklist         []*regexp.Regexp
-	useMagicSignature bool
+	stopWalkOnError        bool
+	allowedFileTypes       []string
+	blocklist              []*regexp.Regexp
+	useInputMagicSignature bool
 
 	fileHandler    *metadataFileHandler
 	extVisitorFunc mediatype.VisitorFunc[map[string]struct{}]
@@ -55,7 +55,7 @@ func (t *traverser) traverseFunc(ctx context.Context) fs.WalkDirFunc {
 			return fs.SkipDir
 		}
 
-		srcMedia, err := mediatype.ID(path, t.useMagicSignature)
+		srcMedia, err := mediatype.ID(path, t.useInputMagicSignature)
 		if err != nil {
 			logger.Debug("Could not identify file as media file.", zap.Error(err))
 			return nil
