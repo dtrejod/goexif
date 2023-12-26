@@ -17,17 +17,17 @@ const (
 )
 
 type mediaMetadataFilename struct {
-	outDir                      *string
-	useLastModifiedDate         bool
-	timestampAsFilename         bool
-	useOutputMagicFileSignature bool
+	outDir                  *string
+	useLastModifiedDate     bool
+	timestampAsFilename     bool
+	useOutputMagicSignature bool
 }
 
 // NewMediaMetadataFilename is a mediatype visitor that will generated an appropriate
 // output filename for a provided mediatype format.
 // - useLastModifiedDate: Fallback to using the last modified date if no EXIF data exists on the media
 // - timestampAsFilename: Use the Unix EPOCH time as the output file name.
-// - useOutputMagicFileSignature: Use the identified mediatype Ext as the extension of the output filename
+// - useOutputMagicSignature: Use the identified mediatype Ext as the extension of the output filename
 // TODO(dtrejo): Rename useLastModifiedDate to fallbackToLastModifiedDate to
 // better describe what this variable actually does.
 func NewMediaMetadataFilename(
@@ -35,13 +35,13 @@ func NewMediaMetadataFilename(
 	outDir *string,
 	useLastModifiedDate,
 	timestampAsFilename,
-	useOutputMagicFileSignature bool,
+	useOutputMagicSignature bool,
 ) mediatype.VisitorFunc[string] {
 	return &mediaMetadataFilename{
-		outDir:                      outDir,
-		useLastModifiedDate:         useLastModifiedDate,
-		timestampAsFilename:         timestampAsFilename,
-		useOutputMagicFileSignature: useOutputMagicFileSignature,
+		outDir:                  outDir,
+		useLastModifiedDate:     useLastModifiedDate,
+		timestampAsFilename:     timestampAsFilename,
+		useOutputMagicSignature: useOutputMagicSignature,
 	}
 }
 
@@ -82,7 +82,7 @@ func (e *mediaMetadataFilename) getOutputFile(_ context.Context, srcPath, cleanE
 	}
 
 	ext := filepath.Ext(srcPath)
-	if e.useOutputMagicFileSignature {
+	if e.useOutputMagicSignature {
 		ext = cleanExt
 	}
 	outFilename := strings.TrimSuffix(filepath.Base(srcPath), filepath.Ext(srcPath))
