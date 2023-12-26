@@ -14,10 +14,10 @@ import (
 )
 
 type metadataFileHandler struct {
-	useMagicSignature bool
-	dryRun            bool
-	detectDuplicates  bool
-	overwriteExisting bool
+	useInputMagicSignature bool
+	dryRun                 bool
+	detectDuplicates       bool
+	overwriteExisting      bool
 
 	mediaMetadataVisitorFunc mediatype.VisitorFunc[string]
 }
@@ -104,7 +104,7 @@ func (s *metadataFileHandler) shouldSkip(ctx context.Context, srcMedia mediatype
 }
 
 func (s *metadataFileHandler) isDuplicateImage(ctx context.Context, srcMedia mediatype.Format, outPath string) (bool, error) {
-	outMedia, err := mediatype.ID(outPath, s.useMagicSignature)
+	outMedia, err := mediatype.ID(outPath, s.useInputMagicSignature)
 	if err != nil {
 		return false, err
 	}

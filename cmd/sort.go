@@ -59,10 +59,10 @@ func shortRun(_ *cobra.Command, _ []string) {
 		opts = append(opts, mediasort.WithLastModifiedFallback())
 	}
 	if magicSignatureIn {
-		opts = append(opts, mediasort.WithIdentifyFileMagicSignature())
+		opts = append(opts, mediasort.WithInputFileMagicSignature())
 	}
 	if magicSignatureOut {
-		opts = append(opts, mediasort.WithGenOutputFileMagicSignature())
+		opts = append(opts, mediasort.WithOutputFileMagicSignature())
 	}
 	if detectDuplicates {
 		opts = append(opts, mediasort.WithDetectDuplicates())
