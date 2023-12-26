@@ -49,7 +49,7 @@ func (f *FormatWithVisitor[T]) Accept(ctx context.Context, v VisitorFunc[T]) (T,
 	case heifMediaFormat:
 		return v.VisitHEIF(ctx, f.heif)
 	default:
-		return *new(T), fmt.Errorf("unknown media type: %s", string(f.t))
+		return *new(T), fmt.Errorf("unknown media type")
 	}
 }
 

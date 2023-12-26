@@ -38,6 +38,7 @@ func (s *metadataFileHandler) handle(ctx context.Context, srcMedia mediatype.For
 		return err
 	}
 
+	logger = logger.With(zap.String("outPath", outPath))
 	if srcPath == outPath {
 		logger.Info("Source and destination file match. Nothing to do.")
 		return nil
@@ -48,12 +49,12 @@ func (s *metadataFileHandler) handle(ctx context.Context, srcMedia mediatype.For
 		return err
 	}
 	if skip {
-		ilog.FromContext(ctx).Info("Skipping file...")
+		logger.Info("Skipping moving source file...")
 		return nil
 	}
 
 	if s.dryRun {
-		logger.Info("Dry run, moving file...", zap.String("outPath", outPath))
+		logger.Info("Dry run, moving file...")
 		return nil
 	}
 
@@ -96,8 +97,8 @@ func (s *metadataFileHandler) shouldSkip(ctx context.Context, srcMedia mediatype
 	}
 
 	if s.overwriteExisting && !s.dryRun {
-		ilog.FromContext(ctx).Info("Force overwrite flag set. Removing existing file.",
-			zap.String("outPath", outPath))
+		ilog.FromContext(ctx).Info("Force overwrite flag set. Removing existing file at path.",
+			zap.String("path", outPath))
 		return false, os.Remove(outPath)
 	}
 	return false, fmt.Errorf("desired output filename collision")
