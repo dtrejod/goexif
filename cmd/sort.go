@@ -96,7 +96,7 @@ func shortRun(_ *cobra.Command, _ []string) {
 }
 
 func init() {
-	sortCmd.Flags().StringVarP(&sourceDir, sourceDirFlagName, "s", "", "Source directory to scan for mediasort files")
+	sortCmd.Flags().StringVarP(&sourceDir, sourceDirFlagName, "s", "", "Source directory to scan for media files")
 	sortCmd.Flags().StringVar(&destDir,
 		destinationDirFlagName,
 		"",

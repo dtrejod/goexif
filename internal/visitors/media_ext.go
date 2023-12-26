@@ -8,7 +8,7 @@ import (
 
 type mediaExt struct{}
 
-// NewMediaExtAliases is a mediatype visitor that will get the path from a media extension aliases
+// NewMediaExtAliases is a mediatype visitor that will get all known media extension aliases
 func NewMediaExtAliases(ctx context.Context) mediatype.VisitorFunc[map[string]struct{}] {
 	return &mediaExt{}
 }

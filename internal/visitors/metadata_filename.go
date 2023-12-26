@@ -28,6 +28,8 @@ type mediaMetadataFilename struct {
 // - useLastModifiedDate: Fallback to using the last modified date if no EXIF data exists on the media
 // - timestampAsFilename: Use the Unix EPOCH time as the output file name.
 // - cleanOutFileExt: Use the identified mediatype Ext as the extension of the output filename
+// TODO(dtrejo): Rename useLastModifiedDate to fallbackToLastModifiedDate to
+// better describe what this variable actually does.
 func NewMediaMetadataFilename(
 	_ context.Context,
 	outDir *string,
