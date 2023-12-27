@@ -19,7 +19,7 @@ var (
 
 var dateCmd = &cobra.Command{
 	Use:   "date",
-	Short: "Date returns the extract metadata datetime from the provided media file",
+	Short: "Date prints the metadata datetime from the provided media file",
 	Run:   dateRun,
 }
 
