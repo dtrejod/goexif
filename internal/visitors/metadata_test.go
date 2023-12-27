@@ -3,6 +3,7 @@ package visitors
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/dtrejod/goexif/internal/mediatype"
 	"github.com/stretchr/testify/assert"
@@ -12,12 +13,15 @@ func TestMetadataFilename(t *testing.T) {
 	ctx := context.Background()
 
 	t.Run("with default config", func(t *testing.T) {
-		expected := "2000/01/01/white.png"
+		expected := MediaMetadata{
+			OutPath:   "2000/01/01/white.png",
+			Timestamp: time.Date(2000, 01, 01, 0, 0, 0, 0, time.UTC),
+		}
 		srcMedia, err := mediatype.ID("./testdata/white.png", false)
 		assert.NoError(t, err)
 
 		visitorFunc := NewMediaMetadataFilename(ctx, toPtr("."), false, false, false)
-		visitor := mediatype.FormatWithVisitor[string](srcMedia)
+		visitor := mediatype.FormatWithVisitor[MediaMetadata](srcMedia)
 		actual, err := visitor.Accept(ctx, visitorFunc)
 		assert.NoError(t, err)
 
@@ -39,12 +43,15 @@ func TestMetadataFilename(t *testing.T) {
 	//})
 
 	t.Run("with timestamp as filename", func(t *testing.T) {
-		expected := "2000/01/01/946684800.png"
+		expected := MediaMetadata{
+			OutPath:   "2000/01/01/946684800.png",
+			Timestamp: time.Date(2000, 01, 01, 0, 0, 0, 0, time.UTC),
+		}
 		srcMedia, err := mediatype.ID("./testdata/white.png", false)
 		assert.NoError(t, err)
 
 		visitorFunc := NewMediaMetadataFilename(ctx, toPtr("."), false, true, false)
-		visitor := mediatype.FormatWithVisitor[string](srcMedia)
+		visitor := mediatype.FormatWithVisitor[MediaMetadata](srcMedia)
 		actual, err := visitor.Accept(ctx, visitorFunc)
 		assert.NoError(t, err)
 
@@ -52,12 +59,15 @@ func TestMetadataFilename(t *testing.T) {
 	})
 
 	t.Run("with clean file extension", func(t *testing.T) {
-		expected := "2000/01/01/ispng.png"
+		expected := MediaMetadata{
+			OutPath:   "2000/01/01/ispng.png",
+			Timestamp: time.Date(2000, 01, 01, 0, 0, 0, 0, time.UTC),
+		}
 		srcMedia, err := mediatype.ID("./testdata/ispng.jpg", true)
 		assert.NoError(t, err)
 
 		visitorFunc := NewMediaMetadataFilename(ctx, toPtr("."), false, false, true)
-		visitor := mediatype.FormatWithVisitor[string](srcMedia)
+		visitor := mediatype.FormatWithVisitor[MediaMetadata](srcMedia)
 		actual, err := visitor.Accept(ctx, visitorFunc)
 		assert.NoError(t, err)
 

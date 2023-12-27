@@ -23,8 +23,14 @@ type mediaMetadataFilename struct {
 	useOutputMagicSignature bool
 }
 
-// NewMediaMetadataFilename is a mediatype visitor that will generated an appropriate
-// output filename for a provided mediatype format.
+// MediaMetadata is the return type from the MediaMetadataFilename visitor
+type MediaMetadata struct {
+	// OutPath is an appropriate new output filename for the provided mediatype format.
+	OutPath   string
+	Timestamp time.Time
+}
+
+// NewMediaMetadataFilename is a mediatype visitor that will generate metadata info on a provided media file
 // - useLastModifiedDate: Fallback to using the last modified date if no EXIF data exists on the media
 // - timestampAsFilename: Use the Unix EPOCH time as the output file name.
 // - useOutputMagicSignature: Use the identified mediatype Ext as the extension of the output filename
@@ -36,7 +42,7 @@ func NewMediaMetadataFilename(
 	useLastModifiedDate,
 	timestampAsFilename,
 	useOutputMagicSignature bool,
-) mediatype.VisitorFunc[string] {
+) mediatype.VisitorFunc[MediaMetadata] {
 	return &mediaMetadataFilename{
 		outDir:                  outDir,
 		useLastModifiedDate:     useLastModifiedDate,
@@ -45,51 +51,42 @@ func NewMediaMetadataFilename(
 	}
 }
 
-func (e *mediaMetadataFilename) VisitJPEG(ctx context.Context, image mediatype.JPEG) (string, error) {
-	ts, err := exifdata.GetExifTime(image.Path)
-	if err != nil {
-		ts, err = e.fallbackToModTime(image.Path, err)
-		if err != nil {
-			return "", err
-		}
-	}
-	return e.getOutputFile(ctx, image.Path, image.Ext(), ts.UTC())
+func (e *mediaMetadataFilename) VisitJPEG(ctx context.Context, image mediatype.JPEG) (MediaMetadata, error) {
+	return e.getEXIFMetadata(ctx, image.Path, image.Ext())
 }
 
 // VisitPNG implements VisitorFunc
 // EXIF extension was adopted for PNG in 2017
 // http://ftp-osl.osuosl.org/pub/libpng/documents/pngext-1.5.0.html#C.eXIf
-func (e *mediaMetadataFilename) VisitPNG(ctx context.Context, image mediatype.PNG) (string, error) {
-	ts, err := exifdata.GetExifTime(image.Path)
-	if err != nil {
-		ts, err = e.fallbackToModTime(image.Path, err)
-		if err != nil {
-			return "", err
-		}
-	}
-	return e.getOutputFile(ctx, image.Path, image.Ext(), ts.UTC())
+func (e *mediaMetadataFilename) VisitPNG(ctx context.Context, image mediatype.PNG) (MediaMetadata, error) {
+	return e.getEXIFMetadata(ctx, image.Path, image.Ext())
 }
 
-func (e *mediaMetadataFilename) VisitHEIF(ctx context.Context, image mediatype.HEIF) (string, error) {
-	ts, err := exifdata.GetExifTime(image.Path)
-	if err != nil {
-		ts, err = e.fallbackToModTime(image.Path, err)
-		if err != nil {
-			return "", err
-		}
-	}
-	return e.getOutputFile(ctx, image.Path, image.Ext(), ts.UTC())
+func (e *mediaMetadataFilename) VisitHEIF(ctx context.Context, image mediatype.HEIF) (MediaMetadata, error) {
+	return e.getEXIFMetadata(ctx, image.Path, image.Ext())
 }
 
-func (e *mediaMetadataFilename) VisitTIFF(ctx context.Context, image mediatype.TIFF) (string, error) {
-	ts, err := exifdata.GetExifTime(image.Path)
+func (e *mediaMetadataFilename) VisitTIFF(ctx context.Context, image mediatype.TIFF) (MediaMetadata, error) {
+	return e.getEXIFMetadata(ctx, image.Path, image.Ext())
+}
+
+func (e *mediaMetadataFilename) getEXIFMetadata(ctx context.Context, srcPath, cleanEXT string) (MediaMetadata, error) {
+	ts, err := exifdata.GetExifTime(srcPath)
 	if err != nil {
-		ts, err = e.fallbackToModTime(image.Path, err)
+		ts, err = e.fallbackToModTime(srcPath, err)
 		if err != nil {
-			return "", err
+			return MediaMetadata{}, err
 		}
 	}
-	return e.getOutputFile(ctx, image.Path, image.Ext(), ts.UTC())
+	outFile, err := e.getOutputFile(ctx, srcPath, cleanEXT, ts.UTC())
+	if err != nil {
+		return MediaMetadata{}, err
+	}
+
+	return MediaMetadata{
+		OutPath:   outFile,
+		Timestamp: ts,
+	}, nil
 }
 
 func (e *mediaMetadataFilename) getOutputFile(_ context.Context, srcPath, cleanExt string, ts time.Time) (string, error) {
