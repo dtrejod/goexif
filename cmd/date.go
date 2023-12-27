@@ -25,7 +25,7 @@ var dateCmd = &cobra.Command{
 
 func dateRun(_ *cobra.Command, _ []string) {
 	if err := mediadate.Print(ctx, sourceFile, magicSignatureIn); err != nil {
-		ilog.FromContext(ctx).Error("Failed to print date for mediafile",
+		ilog.FromContext(ctx).Error("Failed to print date for mediafile.",
 			zap.String("sourceFile", sourceFile),
 			zap.Error(err))
 		os.Exit(1)
