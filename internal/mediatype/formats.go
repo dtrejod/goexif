@@ -11,6 +11,7 @@ type Format struct {
 	jpeg JPEG
 	png  PNG
 	heif HEIF
+	tiff TIFF
 }
 
 type mediaFormat string
@@ -19,6 +20,7 @@ const (
 	jpegMediaFormat mediaFormat = "jpeg"
 	pngMediaFormat  mediaFormat = "png"
 	heifMediaFormat mediaFormat = "heif"
+	tiffMediaFormat mediaFormat = "tiff"
 )
 
 // NewJPEGFormat returns a new JPEG format
@@ -36,6 +38,11 @@ func NewHEIFFormat(h HEIF) Format {
 	return Format{t: heifMediaFormat, heif: h}
 }
 
+// NewTIFFFormat returns a new TIFF format
+func NewTIFFFormat(h TIFF) Format {
+	return Format{t: tiffMediaFormat, tiff: h}
+}
+
 // FormatWithVisitor is a generic Format union type visitor
 type FormatWithVisitor[T any] Format
 
@@ -48,6 +55,8 @@ func (f *FormatWithVisitor[T]) Accept(ctx context.Context, v VisitorFunc[T]) (T,
 		return v.VisitPNG(ctx, f.png)
 	case heifMediaFormat:
 		return v.VisitHEIF(ctx, f.heif)
+	case tiffMediaFormat:
+		return v.VisitTIFF(ctx, f.tiff)
 	default:
 		return *new(T), fmt.Errorf("unknown media type")
 	}
@@ -58,6 +67,7 @@ type VisitorFunc[T any] interface {
 	VisitJPEG(context.Context, JPEG) (T, error)
 	VisitPNG(context.Context, PNG) (T, error)
 	VisitHEIF(context.Context, HEIF) (T, error)
+	VisitTIFF(context.Context, TIFF) (T, error)
 }
 
 // EqualFormats returns true if two Formats are the same type

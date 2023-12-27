@@ -28,6 +28,8 @@ func ID(path string, useSignature bool) (Format, error) {
 		return NewPNGFormat(PNG{Path: path}), nil
 	case contains(HEIF{}.Aliases(), ext):
 		return NewHEIFFormat(HEIF{Path: path}), nil
+	case contains(TIFF{}.Aliases(), ext):
+		return NewTIFFFormat(TIFF{Path: path}), nil
 	default:
 		return Format{}, nil
 	}

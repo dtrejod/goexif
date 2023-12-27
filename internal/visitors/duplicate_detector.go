@@ -10,6 +10,8 @@ import (
 	_ "image/jpeg"
 	// png import for side effect of decoding png images
 	_ "image/png"
+	// tiff import for side effect of decoding tiff images
+	_ "golang.org/x/image/tiff"
 
 	"github.com/corona10/goimagehash"
 	"github.com/dtrejod/goexif/internal/ilog"
@@ -50,6 +52,10 @@ func (m *mediaCompare) VisitPNG(ctx context.Context, outMedia mediatype.PNG) (bo
 
 func (m *mediaCompare) VisitHEIF(ctx context.Context, outMedia mediatype.HEIF) (bool, error) {
 	return false, fmt.Errorf("checking for duplicate is not supported for heif media")
+}
+
+func (m *mediaCompare) VisitTIFF(ctx context.Context, outMedia mediatype.TIFF) (bool, error) {
+	return compareUsingPHash(ctx, m.srcPath, outMedia.Path)
 }
 
 func compareUsingPHash(ctx context.Context, src, dest string) (bool, error) {

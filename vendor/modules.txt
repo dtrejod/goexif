@@ -68,6 +68,11 @@ go.uber.org/zap/internal/bufferpool
 go.uber.org/zap/internal/color
 go.uber.org/zap/internal/exit
 go.uber.org/zap/zapcore
+# golang.org/x/image v0.14.0
+## explicit; go 1.18
+golang.org/x/image/ccitt
+golang.org/x/image/tiff
+golang.org/x/image/tiff/lzw
 # golang.org/x/net v0.0.0-20221002022538-bcab6841153b
 ## explicit; go 1.17
 golang.org/x/net/context
