@@ -19,7 +19,7 @@ type metadataFileHandler struct {
 	detectDuplicates       bool
 	overwriteExisting      bool
 
-	mediaMetadataVisitorFunc mediatype.VisitorFunc[string]
+	mediaMetadataVisitorFunc mediatype.VisitorFunc[visitors.MediaMetadata]
 }
 
 // handle takes in a source media file, and will move it a computed output file
@@ -72,8 +72,12 @@ func (s *metadataFileHandler) handle(ctx context.Context, srcMedia mediatype.For
 }
 
 func (s *metadataFileHandler) getOutputFile(ctx context.Context, media mediatype.Format) (string, error) {
-	visitor := mediatype.FormatWithVisitor[string](media)
-	return visitor.Accept(ctx, s.mediaMetadataVisitorFunc)
+	visitor := mediatype.FormatWithVisitor[visitors.MediaMetadata](media)
+	mediaMetadata, err := visitor.Accept(ctx, s.mediaMetadataVisitorFunc)
+	if err != nil {
+		return "", err
+	}
+	return mediaMetadata.OutPath, nil
 }
 
 func (s *metadataFileHandler) shouldSkip(ctx context.Context, srcMedia mediatype.Format, outPath string) (bool, error) {
