@@ -41,10 +41,10 @@ var (
 var sortCmd = &cobra.Command{
 	Use:   "sort",
 	Short: "Sort mediasort files from their exif/file metadata",
-	Run:   shortRun,
+	Run:   sortRun,
 }
 
-func shortRun(_ *cobra.Command, _ []string) {
+func sortRun(_ *cobra.Command, _ []string) {
 	opts := []mediasort.Option{mediasort.WithSourceDirectory(sourceDir)}
 	if destDir != "" {
 		opts = append(opts, mediasort.WithDestinationDirectory(destDir))
