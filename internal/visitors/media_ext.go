@@ -24,3 +24,7 @@ func (m *mediaExt) VisitPNG(_ context.Context, media mediatype.PNG) (map[string]
 func (m *mediaExt) VisitHEIF(_ context.Context, media mediatype.HEIF) (map[string]struct{}, error) {
 	return media.Aliases(), nil
 }
+
+func (m *mediaExt) VisitTIFF(_ context.Context, media mediatype.TIFF) (map[string]struct{}, error) {
+	return media.Aliases(), nil
+}

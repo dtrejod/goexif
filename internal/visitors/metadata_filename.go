@@ -71,7 +71,25 @@ func (e *mediaMetadataFilename) VisitPNG(ctx context.Context, image mediatype.PN
 }
 
 func (e *mediaMetadataFilename) VisitHEIF(ctx context.Context, image mediatype.HEIF) (string, error) {
-	return "", nil
+	ts, err := exifdata.GetExifTime(image.Path)
+	if err != nil {
+		ts, err = e.fallbackToModTime(image.Path, err)
+		if err != nil {
+			return "", err
+		}
+	}
+	return e.getOutputFile(ctx, image.Path, image.Ext(), ts.UTC())
+}
+
+func (e *mediaMetadataFilename) VisitTIFF(ctx context.Context, image mediatype.TIFF) (string, error) {
+	ts, err := exifdata.GetExifTime(image.Path)
+	if err != nil {
+		ts, err = e.fallbackToModTime(image.Path, err)
+		if err != nil {
+			return "", err
+		}
+	}
+	return e.getOutputFile(ctx, image.Path, image.Ext(), ts.UTC())
 }
 
 func (e *mediaMetadataFilename) getOutputFile(_ context.Context, srcPath, cleanExt string, ts time.Time) (string, error) {

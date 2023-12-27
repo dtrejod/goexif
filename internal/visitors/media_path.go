@@ -24,3 +24,7 @@ func (m *mediaPath) VisitPNG(_ context.Context, media mediatype.PNG) (string, er
 func (m *mediaPath) VisitHEIF(_ context.Context, media mediatype.HEIF) (string, error) {
 	return media.Path, nil
 }
+
+func (m *mediaPath) VisitTIFF(_ context.Context, media mediatype.TIFF) (string, error) {
+	return media.Path, nil
+}
