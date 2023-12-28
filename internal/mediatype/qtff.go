@@ -1,6 +1,7 @@
 package mediatype
 
 // QTFF indetifies Quicktime media
+// Ref: https://en.wikipedia.org/wiki/QuickTime_File_Format
 type QTFF struct {
 	Path string
 }

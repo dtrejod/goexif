@@ -143,6 +143,7 @@ func getSHA256Hash(path string) ([]byte, error) {
 		return nil, err
 	}
 	defer f.Close()
+
 	h := sha256.New()
 	if _, err := io.Copy(h, f); err != nil {
 		return nil, err
