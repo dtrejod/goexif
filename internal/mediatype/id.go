@@ -32,6 +32,8 @@ func ID(path string, useSignature bool) (Format, error) {
 		return NewTIFFFormat(TIFF{Path: path}), nil
 	case contains(QTFF{}.Aliases(), ext):
 		return NewQTFFFormat(QTFF{Path: path}), nil
+	case contains(MP4{}.Aliases(), ext):
+		return NewMP4Format(MP4{Path: path}), nil
 	default:
 		return Format{}, nil
 	}

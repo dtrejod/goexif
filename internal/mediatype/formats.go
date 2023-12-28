@@ -13,6 +13,7 @@ type Format struct {
 	heif HEIF
 	tiff TIFF
 	mov  QTFF
+	mp4  MP4
 }
 
 type mediaFormat string
@@ -23,6 +24,7 @@ const (
 	heifMediaFormat mediaFormat = "heif"
 	tiffMediaFormat mediaFormat = "tiff"
 	qtffMediaFormat mediaFormat = "qtff"
+	mp4MediaFormat  mediaFormat = "mp4"
 )
 
 // NewJPEGFormat returns a new JPEG format
@@ -50,6 +52,11 @@ func NewQTFFFormat(h QTFF) Format {
 	return Format{t: qtffMediaFormat, mov: h}
 }
 
+// NewMP4Format returns a new MPEG-4 format
+func NewMP4Format(h MP4) Format {
+	return Format{t: mp4MediaFormat, mp4: h}
+}
+
 // FormatWithVisitor is a generic Format union type visitor
 type FormatWithVisitor[T any] Format
 
@@ -66,6 +73,8 @@ func (f *FormatWithVisitor[T]) Accept(ctx context.Context, v VisitorFunc[T]) (T,
 		return v.VisitTIFF(ctx, f.tiff)
 	case qtffMediaFormat:
 		return v.VisitQTFF(ctx, f.mov)
+	case mp4MediaFormat:
+		return v.VisitMP4(ctx, f.mp4)
 	default:
 		return *new(T), fmt.Errorf("unknown media type")
 	}
@@ -78,6 +87,7 @@ type VisitorFunc[T any] interface {
 	VisitHEIF(context.Context, HEIF) (T, error)
 	VisitTIFF(context.Context, TIFF) (T, error)
 	VisitQTFF(context.Context, QTFF) (T, error)
+	VisitMP4(context.Context, MP4) (T, error)
 }
 
 // EqualFormats returns true if two Formats are the same type

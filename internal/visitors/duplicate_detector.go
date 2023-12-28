@@ -65,6 +65,10 @@ func (m *mediaCompare) VisitQTFF(ctx context.Context, outMedia mediatype.QTFF) (
 	return compareUsingSHA256(ctx, m.srcPath, outMedia.Path)
 }
 
+func (m *mediaCompare) VisitMP4(ctx context.Context, outMedia mediatype.MP4) (bool, error) {
+	return compareUsingSHA256(ctx, m.srcPath, outMedia.Path)
+}
+
 func compareUsingPHash(ctx context.Context, src, dest string) (bool, error) {
 	logger := ilog.FromContext(ctx).With(
 		zap.String("sourcePath", src),

@@ -10,7 +10,7 @@ import (
 
 	"github.com/dtrejod/goexif/internal/exifdata"
 	"github.com/dtrejod/goexif/internal/mediatype"
-	"github.com/dtrejod/goexif/internal/mp4data"
+	"github.com/dtrejod/goexif/internal/moovdata"
 )
 
 const (
@@ -53,26 +53,30 @@ func NewMediaMetadataFilename(
 }
 
 func (e *mediaMetadataFilename) VisitJPEG(ctx context.Context, image mediatype.JPEG) (MediaMetadata, error) {
-	return e.getEXIFMetadata(ctx, image.Path, exifdata.GetExifTime, image.Ext())
+	return e.getEXIFMetadata(ctx, image.Path, exifdata.GetTime, image.Ext())
 }
 
 // VisitPNG implements VisitorFunc
 // EXIF extension was adopted for PNG in 2017
 // http://ftp-osl.osuosl.org/pub/libpng/documents/pngext-1.5.0.html#C.eXIf
 func (e *mediaMetadataFilename) VisitPNG(ctx context.Context, image mediatype.PNG) (MediaMetadata, error) {
-	return e.getEXIFMetadata(ctx, image.Path, exifdata.GetExifTime, image.Ext())
+	return e.getEXIFMetadata(ctx, image.Path, exifdata.GetTime, image.Ext())
 }
 
 func (e *mediaMetadataFilename) VisitHEIF(ctx context.Context, image mediatype.HEIF) (MediaMetadata, error) {
-	return e.getEXIFMetadata(ctx, image.Path, exifdata.GetExifTime, image.Ext())
+	return e.getEXIFMetadata(ctx, image.Path, exifdata.GetTime, image.Ext())
 }
 
 func (e *mediaMetadataFilename) VisitTIFF(ctx context.Context, image mediatype.TIFF) (MediaMetadata, error) {
-	return e.getEXIFMetadata(ctx, image.Path, exifdata.GetExifTime, image.Ext())
+	return e.getEXIFMetadata(ctx, image.Path, exifdata.GetTime, image.Ext())
 }
 
 func (e *mediaMetadataFilename) VisitQTFF(ctx context.Context, image mediatype.QTFF) (MediaMetadata, error) {
-	return e.getEXIFMetadata(ctx, image.Path, mp4data.GetMP4Time, image.Ext())
+	return e.getEXIFMetadata(ctx, image.Path, moovdata.GetTime, image.Ext())
+}
+
+func (e *mediaMetadataFilename) VisitMP4(ctx context.Context, image mediatype.MP4) (MediaMetadata, error) {
+	return e.getEXIFMetadata(ctx, image.Path, moovdata.GetTime, image.Ext())
 }
 
 func (e *mediaMetadataFilename) getEXIFMetadata(

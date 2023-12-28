@@ -1,4 +1,4 @@
-package mp4data
+package moovdata
 
 import (
 	"errors"
@@ -17,8 +17,8 @@ var (
 	//metaBoxPath mp4.BoxPath = []mp4.BoxType{mp4.BoxTypeMeta()}
 )
 
-// GetMP4Time return the CreationTime from a MP4 file
-func GetMP4Time(path string) (time.Time, error) {
+// GetTime return the CreationTime from a MooV file
+func GetTime(path string) (time.Time, error) {
 	boxes, err := getMetadataBoxes(path)
 	if err != nil {
 		return time.Time{}, err
