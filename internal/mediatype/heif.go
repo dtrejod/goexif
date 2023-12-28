@@ -1,6 +1,7 @@
 package mediatype
 
 // HEIF identifies HEIF media
+// Ref: https://en.wikipedia.org/wiki/High_Efficiency_Image_File_Format
 type HEIF struct {
 	Path string
 }
@@ -19,5 +20,12 @@ func (t HEIF) Ext() string {
 func (t HEIF) Aliases() map[string]struct{} {
 	return map[string]struct{}{
 		t.String(): {},
+		"heifs":    {},
+		"heic":     {},
+		"heics":    {},
+		"avci":     {},
+		"avcs":     {},
+		"avif":     {},
+		"hif":      {},
 	}
 }
