@@ -1,8 +1,7 @@
 package mediatype
 
 // PNG identifies PNG media.
-// EXIF extension was adopted for PNG in 2017
-// http://ftp-osl.osuosl.org/pub/libpng/documents/pngext-1.5.0.html#C.eXIf
+// REF: https://en.wikipedia.org/wiki/PNG
 type PNG struct {
 	Path string
 }

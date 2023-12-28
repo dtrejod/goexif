@@ -1,6 +1,7 @@
 package mediatype
 
 // TIFF indetifies TIFF media
+// REF: https://en.wikipedia.org/wiki/TIFF
 type TIFF struct {
 	Path string
 }
@@ -19,5 +20,6 @@ func (t TIFF) Ext() string {
 func (t TIFF) Aliases() map[string]struct{} {
 	return map[string]struct{}{
 		t.String(): {},
+		"tif":      {},
 	}
 }

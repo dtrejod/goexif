@@ -1,6 +1,7 @@
 package mediatype
 
 // JPEG indetifies JPEG media
+// REF: https://en.wikipedia.org/wiki/JPEG
 type JPEG struct {
 	Path string
 }
@@ -20,5 +21,9 @@ func (t JPEG) Aliases() map[string]struct{} {
 	return map[string]struct{}{
 		t.String(): {},
 		"jpeg":     {},
+		"jpe":      {},
+		"jif":      {},
+		"jfif":     {},
+		"jfi":      {},
 	}
 }
