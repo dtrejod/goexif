@@ -40,7 +40,7 @@ func (s *metadataFileHandler) handle(ctx context.Context, srcMedia mediatype.For
 
 	logger = logger.With(zap.String("outPath", outPath))
 	if srcPath == outPath {
-		logger.Info("Source and destination file match. Nothing to do.")
+		logger.Debug("Source and destination file match. Nothing to do.")
 		return nil
 	}
 
@@ -49,12 +49,12 @@ func (s *metadataFileHandler) handle(ctx context.Context, srcMedia mediatype.For
 		return err
 	}
 	if skip {
-		logger.Info("Skipping moving source file...")
+		logger.Debug("Skipping moving source file...")
 		return nil
 	}
 
 	if s.dryRun {
-		logger.Info("Dry run, moving file...")
+		logger.Debug("Dry run, moving file...")
 		return nil
 	}
 
@@ -67,7 +67,7 @@ func (s *metadataFileHandler) handle(ctx context.Context, srcMedia mediatype.For
 		return err
 	}
 
-	logger.Info("Successfully moved file.")
+	logger.Debug("Successfully moved file.")
 	return nil
 }
 
@@ -95,13 +95,13 @@ func (s *metadataFileHandler) shouldSkip(ctx context.Context, srcMedia mediatype
 			return false, fmt.Errorf("%w: failed to detect if images are duplicate", err)
 		}
 		if isDuplicate {
-			ilog.FromContext(ctx).Info("Detected duplicate image.")
+			ilog.FromContext(ctx).Debug("Detected duplicate image.")
 			return true, nil
 		}
 	}
 
 	if s.overwriteExisting && !s.dryRun {
-		ilog.FromContext(ctx).Info("Force overwrite flag set. Removing existing file at path.",
+		ilog.FromContext(ctx).Debug("Force overwrite flag set. Removing existing file at path.",
 			zap.String("path", outPath))
 		return false, os.Remove(outPath)
 	}
