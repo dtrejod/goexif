@@ -21,6 +21,8 @@ var (
 		"png",
 		"heif",
 		"tiff",
+		"mov",
+		"mp4",
 	}
 	// DefaultBlocklist are default regexes that are ignored by the sorter.
 	DefaultBlocklist = []*regexp.Regexp{
