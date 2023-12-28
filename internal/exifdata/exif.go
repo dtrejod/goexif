@@ -20,8 +20,8 @@ var (
 	}
 )
 
-// GetExifTime returns the EXIF metadata Datetime from media referenced in the provided path
-func GetExifTime(path string) (time.Time, error) {
+// GetTime returns the EXIF metadata Datetime from media referenced in the provided path
+func GetTime(path string) (time.Time, error) {
 	// get RoofIfd
 	rootIfd, err := getRootIfd(path)
 	if err != nil {
@@ -47,7 +47,7 @@ func GetExifTime(path string) (time.Time, error) {
 	return t.UTC(), nil
 }
 
-func getTimeFromTag(exifIfd *exif.Ifd) (value string, err error) {
+func getTimeFromTag(exifIfd *exif.Ifd) (string, error) {
 	for _, tag := range dateTags {
 		results, err := exifIfd.FindTagWithName(tag)
 		if err != nil {

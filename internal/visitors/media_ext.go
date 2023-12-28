@@ -28,3 +28,11 @@ func (m *mediaExt) VisitHEIF(_ context.Context, media mediatype.HEIF) (map[strin
 func (m *mediaExt) VisitTIFF(_ context.Context, media mediatype.TIFF) (map[string]struct{}, error) {
 	return media.Aliases(), nil
 }
+
+func (m *mediaExt) VisitQTFF(_ context.Context, media mediatype.QTFF) (map[string]struct{}, error) {
+	return media.Aliases(), nil
+}
+
+func (m *mediaExt) VisitMP4(_ context.Context, media mediatype.MP4) (map[string]struct{}, error) {
+	return media.Aliases(), nil
+}

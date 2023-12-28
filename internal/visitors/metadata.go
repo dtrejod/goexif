@@ -10,6 +10,7 @@ import (
 
 	"github.com/dtrejod/goexif/internal/exifdata"
 	"github.com/dtrejod/goexif/internal/mediatype"
+	"github.com/dtrejod/goexif/internal/moovdata"
 )
 
 const (
@@ -52,26 +53,39 @@ func NewMediaMetadataFilename(
 }
 
 func (e *mediaMetadataFilename) VisitJPEG(ctx context.Context, image mediatype.JPEG) (MediaMetadata, error) {
-	return e.getEXIFMetadata(ctx, image.Path, image.Ext())
+	return e.getEXIFMetadata(ctx, image.Path, exifdata.GetTime, image.Ext())
 }
 
 // VisitPNG implements VisitorFunc
 // EXIF extension was adopted for PNG in 2017
 // http://ftp-osl.osuosl.org/pub/libpng/documents/pngext-1.5.0.html#C.eXIf
 func (e *mediaMetadataFilename) VisitPNG(ctx context.Context, image mediatype.PNG) (MediaMetadata, error) {
-	return e.getEXIFMetadata(ctx, image.Path, image.Ext())
+	return e.getEXIFMetadata(ctx, image.Path, exifdata.GetTime, image.Ext())
 }
 
 func (e *mediaMetadataFilename) VisitHEIF(ctx context.Context, image mediatype.HEIF) (MediaMetadata, error) {
-	return e.getEXIFMetadata(ctx, image.Path, image.Ext())
+	return e.getEXIFMetadata(ctx, image.Path, exifdata.GetTime, image.Ext())
 }
 
 func (e *mediaMetadataFilename) VisitTIFF(ctx context.Context, image mediatype.TIFF) (MediaMetadata, error) {
-	return e.getEXIFMetadata(ctx, image.Path, image.Ext())
+	return e.getEXIFMetadata(ctx, image.Path, exifdata.GetTime, image.Ext())
 }
 
-func (e *mediaMetadataFilename) getEXIFMetadata(ctx context.Context, srcPath, cleanEXT string) (MediaMetadata, error) {
-	ts, err := exifdata.GetExifTime(srcPath)
+func (e *mediaMetadataFilename) VisitQTFF(ctx context.Context, image mediatype.QTFF) (MediaMetadata, error) {
+	return e.getEXIFMetadata(ctx, image.Path, moovdata.GetTime, image.Ext())
+}
+
+func (e *mediaMetadataFilename) VisitMP4(ctx context.Context, image mediatype.MP4) (MediaMetadata, error) {
+	return e.getEXIFMetadata(ctx, image.Path, moovdata.GetTime, image.Ext())
+}
+
+func (e *mediaMetadataFilename) getEXIFMetadata(
+	ctx context.Context,
+	srcPath string,
+	tsFunc func(string) (time.Time, error),
+	cleanEXT string,
+) (MediaMetadata, error) {
+	ts, err := tsFunc(srcPath)
 	if err != nil {
 		ts, err = e.fallbackToModTime(srcPath, err)
 		if err != nil {
