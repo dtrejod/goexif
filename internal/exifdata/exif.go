@@ -47,7 +47,7 @@ func GetExifTime(path string) (time.Time, error) {
 	return t.UTC(), nil
 }
 
-func getTimeFromTag(exifIfd *exif.Ifd) (value string, err error) {
+func getTimeFromTag(exifIfd *exif.Ifd) (string, error) {
 	for _, tag := range dateTags {
 		results, err := exifIfd.FindTagWithName(tag)
 		if err != nil {

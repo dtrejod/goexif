@@ -1,9 +1,12 @@
 package visitors
 
 import (
+	"bytes"
 	"context"
+	"crypto/sha256"
 	"fmt"
 	"image"
+	"io"
 	"os"
 
 	// jpeg import for side effect of decoding jpeg images
@@ -58,6 +61,10 @@ func (m *mediaCompare) VisitTIFF(ctx context.Context, outMedia mediatype.TIFF) (
 	return compareUsingPHash(ctx, m.srcPath, outMedia.Path)
 }
 
+func (m *mediaCompare) VisitQTFF(ctx context.Context, outMedia mediatype.QTFF) (bool, error) {
+	return compareUsingSHA256(ctx, m.srcPath, outMedia.Path)
+}
+
 func compareUsingPHash(ctx context.Context, src, dest string) (bool, error) {
 	logger := ilog.FromContext(ctx).With(
 		zap.String("sourcePath", src),
@@ -97,6 +104,7 @@ func getImagePerceptionHash(path string) (*goimagehash.ImageHash, error) {
 	if err != nil {
 		return nil, fmt.Errorf("%w: failed to open image", err)
 	}
+	defer f.Close()
 
 	img, _, err := image.Decode(f)
 	if err != nil {
@@ -108,4 +116,33 @@ func getImagePerceptionHash(path string) (*goimagehash.ImageHash, error) {
 		return nil, fmt.Errorf("%w: failed to get perception hash image", err)
 	}
 	return hashA, nil
+}
+
+func compareUsingSHA256(ctx context.Context, src, dest string) (bool, error) {
+	hashA, err := getSHA256Hash(src)
+	if err != nil {
+		return false, err
+	}
+
+	hashB, err := getSHA256Hash(dest)
+	if err != nil {
+		return false, err
+	}
+
+	return bytes.Equal(hashA, hashB), nil
+}
+
+// getSHA256Hash returns the sha256 hash of a file
+func getSHA256Hash(path string) ([]byte, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+	h := sha256.New()
+	if _, err := io.Copy(h, f); err != nil {
+		return nil, err
+	}
+
+	return h.Sum(nil), nil
 }

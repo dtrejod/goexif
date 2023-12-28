@@ -30,6 +30,8 @@ func ID(path string, useSignature bool) (Format, error) {
 		return NewHEIFFormat(HEIF{Path: path}), nil
 	case contains(TIFF{}.Aliases(), ext):
 		return NewTIFFFormat(TIFF{Path: path}), nil
+	case contains(QTFF{}.Aliases(), ext):
+		return NewQTFFFormat(QTFF{Path: path}), nil
 	default:
 		return Format{}, nil
 	}
