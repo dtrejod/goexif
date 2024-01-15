@@ -103,13 +103,6 @@ func getMetadataBoxes(path string) ([]*mp4.BoxInfoWithPayload, error) {
 		}
 
 		if handled || handledChild {
-			// set if underIlst on box context for parsing box code below
-			if len(h.Path) > 0 {
-				if h.Path[len(h.Path)-1] == mp4.BoxTypeIlst() {
-					h.BoxInfo.Context.UnderIlst = true
-				}
-			}
-
 			bis = append(bis, &h.BoxInfo)
 
 			// Expands children
