@@ -2,7 +2,6 @@ package moovdata
 
 import (
 	"errors"
-	"fmt"
 	"os"
 	"time"
 
@@ -81,7 +80,6 @@ func getTimeFromBoxes(boxes []*mp4.BoxInfoWithPayload) (time.Time, error) {
 		return (*ilstTs).UTC(), nil
 	}
 	if mvhdTs != nil {
-		fmt.Println("mvhd")
 		return (*mvhdTs).UTC(), nil
 	}
 
@@ -95,15 +93,13 @@ func getMetadataBoxes(path string) ([]*mp4.BoxInfoWithPayload, error) {
 	}
 	defer f.Close()
 
-	var handledChild bool
 	var bis []*mp4.BoxInfo
 	_, err = mp4.ReadBoxStructure(f, func(h *mp4.ReadHandle) (interface{}, error) {
 		_, handled := handledBoxes[h.BoxInfo.Type]
 
+		handledChild := false
 		if len(h.Path) > 1 {
 			_, handledChild = handledChildBoxes[h.Path[len(h.Path)-2]]
-		} else {
-			handledChild = false
 		}
 
 		if handled || handledChild {
@@ -121,6 +117,9 @@ func getMetadataBoxes(path string) ([]*mp4.BoxInfoWithPayload, error) {
 		}
 		return nil, nil
 	})
+	if err != nil {
+		return nil, err
+	}
 
 	bs := make([]*mp4.BoxInfoWithPayload, 0, len(bis))
 	for _, bi := range bis {
