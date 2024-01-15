@@ -75,12 +75,6 @@ func init() {
 	for _, bt := range ilstMetaBoxTypes {
 		AddAnyTypeBoxDefEx(&IlstMetaContainer{}, bt, isIlstMetaContainer)
 	}
-	// NOTE: Theoretically the number of keys can go up to 0xFFFFFFFF but
-	// we avoid initializing that many keys BoxTypes. Instead we
-	// handle up to 1024 keys
-	for i := uint32(0); i < 1024; i++ {
-		AddAnyTypeBoxDefEx(&Item{}, Uint32ToBoxType(i), isIlstMetaContainer)
-	}
 	AddAnyTypeBoxDefEx(&StringData{}, StrToBoxType("mean"), isUnderIlstFreeFormat)
 	AddAnyTypeBoxDefEx(&StringData{}, StrToBoxType("name"), isUnderIlstFreeFormat)
 }
@@ -175,7 +169,9 @@ func (sd *StringData) StringifyField(name string, indent string, depth int, ctx 
 	return "", false
 }
 
-// Item is a item under an item list
+/*************************** numbered items ****************************/
+
+// Item is a numbered item under an item list atom
 // https://developer.apple.com/documentation/quicktime-file-format/metadata_item_list_atom/item_list
 type Item struct {
 	AnyTypeBox
@@ -227,6 +223,8 @@ func (k *Keys) GetFieldLength(name string, ctx Context) uint {
 	}
 	panic(fmt.Errorf("invalid name of dynamic-length field: boxType=keys fieldName=%s", name))
 }
+
+/*************************** key ****************************/
 
 // Key is a key value field in the Keys BoxType
 // https://developer.apple.com/documentation/quicktime-file-format/metadata_item_keys_atom/key_value_key_size-8

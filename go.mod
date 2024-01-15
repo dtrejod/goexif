@@ -31,4 +31,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace github.com/abema/go-mp4 v1.1.1 => github.com/dtrejod/go-mp4 v0.0.0-20231229210554-26cd6eb9eb1a
+replace github.com/abema/go-mp4 v1.1.1 => github.com/dtrejod/go-mp4 v0.0.0-20240115164518-848082db2d24
