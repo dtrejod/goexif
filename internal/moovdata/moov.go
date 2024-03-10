@@ -12,9 +12,6 @@ var (
 	// mvhdBoxPath is the BoxPath to the MVHD Box that contains Creation Time metadata
 	// Ref: https://developer.apple.com/documentation/quicktime-file-format/movie_header_atom/creation_time
 	mvhdBoxPath mp4.BoxPath = []mp4.BoxType{mp4.BoxTypeMoov(), mp4.BoxTypeMvhd()}
-	// metaBoxPath is the BoxPath to the Meta Box the contains tags that may contain a CreationDate tag key
-	// Ref: https://developer.apple.com/documentation/quicktime-file-format/metadata_atom
-	//metaBoxPath mp4.BoxPath = []mp4.BoxType{mp4.BoxTypeMeta()}
 )
 
 // GetTime return the CreationTime from a MooV file
@@ -29,9 +26,6 @@ func GetTime(path string) (time.Time, error) {
 func getTimeFromBoxes(boxes []*mp4.BoxInfoWithPayload) (time.Time, error) {
 	for _, box := range boxes {
 		switch t := box.Payload.(type) {
-		case *mp4.Meta:
-			// TODO: Parse tags once go-mp4 supports parsing tags from the Meta box
-			// https://github.com/abema/go-mp4/issues/13
 		case *mp4.Mvhd:
 			return timeSince1904(t.CreationTimeV0), nil
 		}
