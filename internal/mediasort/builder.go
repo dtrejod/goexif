@@ -23,6 +23,7 @@ var (
 		mediatype.TIFF{}.String(),
 		mediatype.QTFF{}.String(),
 		mediatype.MP4{}.String(),
+		mediatype.AVI{}.String(),
 	}
 	// DefaultBlocklist are default regexes that are ignored by the sorter.
 	DefaultBlocklist = []*regexp.Regexp{
