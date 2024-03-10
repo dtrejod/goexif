@@ -36,3 +36,7 @@ func (m *mediaExt) VisitQTFF(_ context.Context, media mediatype.QTFF) (map[strin
 func (m *mediaExt) VisitMP4(_ context.Context, media mediatype.MP4) (map[string]struct{}, error) {
 	return media.Aliases(), nil
 }
+
+func (m *mediaExt) VisitAVI(_ context.Context, media mediatype.AVI) (map[string]struct{}, error) {
+	return media.Aliases(), nil
+}

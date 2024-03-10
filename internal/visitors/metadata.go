@@ -11,6 +11,7 @@ import (
 	"github.com/dtrejod/goexif/internal/exifdata"
 	"github.com/dtrejod/goexif/internal/mediatype"
 	"github.com/dtrejod/goexif/internal/moovdata"
+	"github.com/dtrejod/goexif/internal/riffdata"
 )
 
 const (
@@ -53,33 +54,37 @@ func NewMediaMetadataFilename(
 }
 
 func (e *mediaMetadataFilename) VisitJPEG(ctx context.Context, image mediatype.JPEG) (MediaMetadata, error) {
-	return e.getEXIFMetadata(ctx, image.Path, exifdata.GetTime, image.Ext())
+	return e.getTimeMetadatadata(ctx, image.Path, exifdata.GetTime, image.Ext())
 }
 
 // VisitPNG implements VisitorFunc
 // EXIF extension was adopted for PNG in 2017
 // http://ftp-osl.osuosl.org/pub/libpng/documents/pngext-1.5.0.html#C.eXIf
 func (e *mediaMetadataFilename) VisitPNG(ctx context.Context, image mediatype.PNG) (MediaMetadata, error) {
-	return e.getEXIFMetadata(ctx, image.Path, exifdata.GetTime, image.Ext())
+	return e.getTimeMetadatadata(ctx, image.Path, exifdata.GetTime, image.Ext())
 }
 
 func (e *mediaMetadataFilename) VisitHEIF(ctx context.Context, image mediatype.HEIF) (MediaMetadata, error) {
-	return e.getEXIFMetadata(ctx, image.Path, exifdata.GetTime, image.Ext())
+	return e.getTimeMetadatadata(ctx, image.Path, exifdata.GetTime, image.Ext())
 }
 
 func (e *mediaMetadataFilename) VisitTIFF(ctx context.Context, image mediatype.TIFF) (MediaMetadata, error) {
-	return e.getEXIFMetadata(ctx, image.Path, exifdata.GetTime, image.Ext())
+	return e.getTimeMetadatadata(ctx, image.Path, exifdata.GetTime, image.Ext())
 }
 
 func (e *mediaMetadataFilename) VisitQTFF(ctx context.Context, image mediatype.QTFF) (MediaMetadata, error) {
-	return e.getEXIFMetadata(ctx, image.Path, moovdata.GetTime, image.Ext())
+	return e.getTimeMetadatadata(ctx, image.Path, moovdata.GetTime, image.Ext())
 }
 
 func (e *mediaMetadataFilename) VisitMP4(ctx context.Context, image mediatype.MP4) (MediaMetadata, error) {
-	return e.getEXIFMetadata(ctx, image.Path, moovdata.GetTime, image.Ext())
+	return e.getTimeMetadatadata(ctx, image.Path, moovdata.GetTime, image.Ext())
 }
 
-func (e *mediaMetadataFilename) getEXIFMetadata(
+func (e *mediaMetadataFilename) VisitAVI(ctx context.Context, image mediatype.AVI) (MediaMetadata, error) {
+	return e.getTimeMetadatadata(ctx, image.Path, riffdata.GetTime, image.Ext())
+}
+
+func (e *mediaMetadataFilename) getTimeMetadatadata(
 	ctx context.Context,
 	srcPath string,
 	tsFunc func(string) (time.Time, error),

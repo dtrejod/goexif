@@ -36,3 +36,7 @@ func (m *mediaPath) VisitQTFF(_ context.Context, media mediatype.QTFF) (string, 
 func (m *mediaPath) VisitMP4(_ context.Context, media mediatype.MP4) (string, error) {
 	return media.Path, nil
 }
+
+func (m *mediaPath) VisitAVI(_ context.Context, media mediatype.AVI) (string, error) {
+	return media.Path, nil
+}
