@@ -85,7 +85,6 @@ func getTimeFromReader(r io.Reader, chunkLen uint32) (time.Time, error) {
 	val := string(bytes.TrimRight(buf.Bytes(), "\x0a\x00"))
 
 	// Parse string into Time
-	// TODO: Parse timezone
 	t, err := time.Parse(riffIDITDateLayout, val)
 	if err != nil {
 		return time.Time{}, err
