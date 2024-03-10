@@ -77,6 +77,7 @@ go.uber.org/zap/zapcore
 # golang.org/x/image v0.14.0
 ## explicit; go 1.18
 golang.org/x/image/ccitt
+golang.org/x/image/riff
 golang.org/x/image/tiff
 golang.org/x/image/tiff/lzw
 # golang.org/x/net v0.0.0-20221002022538-bcab6841153b
