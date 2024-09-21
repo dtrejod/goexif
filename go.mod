@@ -8,7 +8,7 @@ require (
 	github.com/dsoprea/go-exif/v3 v3.0.1
 	github.com/go-errors/errors v1.4.2
 	github.com/h2non/filetype v1.1.3
-	github.com/spf13/cobra v1.7.0
+	github.com/spf13/cobra v1.8.1
 	github.com/stretchr/testify v1.8.0
 	go.uber.org/zap v1.24.0
 	golang.org/x/image v0.20.0
