@@ -11,7 +11,7 @@ import (
 func TestMediaPath(t *testing.T) {
 	ctx := context.Background()
 	expected := "./testdata/white.png"
-	srcMedia, err := mediatype.ID("./testdata/white.png", false)
+	srcMedia, err := mediatype.NewFormat("./testdata/white.png", false)
 	assert.NoError(t, err)
 
 	visitorFunc := NewMediaPath(ctx)

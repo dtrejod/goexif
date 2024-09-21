@@ -61,7 +61,7 @@ func (t *traverser) traverseFunc(ctx context.Context, isPreRun bool) fs.WalkDirF
 			return fs.SkipDir
 		}
 
-		srcMedia, err := mediatype.ID(path, t.useInputMagicSignature)
+		srcMedia, err := mediatype.NewFormat(path, t.useInputMagicSignature)
 		if err != nil {
 			logger.Debug("Could not identify file as media file.", zap.Error(err))
 			return nil

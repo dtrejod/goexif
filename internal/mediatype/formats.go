@@ -3,109 +3,68 @@ package mediatype
 import (
 	"context"
 	"fmt"
+	"path/filepath"
+	"strings"
+
+	"github.com/h2non/filetype"
 )
 
-// Format is union type of all known mediatype formats
+// MediaType represents a common interface for all media formats
+type MediaType interface {
+	// String implements Stringer interface
+	String() string
+	// Ext returns the file extension
+	Ext() string
+	// Aliases returns known file type aliases for this media type
+	Aliases() map[string]struct{}
+}
+
+// Format is a container for any known media type
 type Format struct {
-	t    mediaFormat
-	jpeg JPEG
-	png  PNG
-	heif HEIF
-	tiff TIFF
-	mov  QTFF
-	mp4  MP4
-	avi  AVI
-	gpp  GPP
-	gpp2 GPP2
+	media MediaType
 }
 
-type mediaFormat string
-
-const (
-	jpegMediaFormat mediaFormat = "jpeg"
-	pngMediaFormat  mediaFormat = "png"
-	heifMediaFormat mediaFormat = "heif"
-	tiffMediaFormat mediaFormat = "tiff"
-	qtffMediaFormat mediaFormat = "qtff"
-	mp4MediaFormat  mediaFormat = "mp4"
-	aviMediaFormat  mediaFormat = "avi"
-	gppMediaFormat  mediaFormat = "gpp"
-	gpp2MediaFormat mediaFormat = "gpp2"
-)
-
-// NewJPEGFormat returns a new JPEG format
-func NewJPEGFormat(j JPEG) Format {
-	return Format{t: jpegMediaFormat, jpeg: j}
+// AllKnownMediaTypes is a list of all known media types
+var AllKnownMediaTypes = []MediaType{
+	JPEG{},
+	PNG{},
+	HEIF{},
+	TIFF{},
+	QTFF{},
+	MP4{},
+	AVI{},
+	GPP{},
+	GPP2{},
 }
 
-// NewPNGFormat returns a new PNG format
-func NewPNGFormat(p PNG) Format {
-	return Format{t: pngMediaFormat, png: p}
+// NewFormat returns a new Format instance based on the file extension. If useSignature is true, then the existing file
+// extension is ignored and we use the file magic signature instead
+// REF: https://en.wikipedia.org/wiki/File_format#Magic_number
+func NewFormat(path string, useSignature bool) (Format, error) {
+	ext := strings.TrimPrefix(filepath.Ext(strings.ToLower(path)), ".")
+	if useSignature {
+		t, err := filetype.MatchFile(path)
+		if err != nil {
+			return Format{}, err
+		}
+		ext = t.Extension
+	}
+
+	for _, mt := range AllKnownMediaTypes {
+		if contains(mt.Aliases(), ext) {
+			return Format{media: mt}, nil
+		}
+	}
+	return Format{media: Unknown{}}, nil
 }
 
-// NewHEIFFormat returns a new HEIF format
-func NewHEIFFormat(h HEIF) Format {
-	return Format{t: heifMediaFormat, heif: h}
-}
-
-// NewTIFFFormat returns a new TIFF format
-func NewTIFFFormat(h TIFF) Format {
-	return Format{t: tiffMediaFormat, tiff: h}
-}
-
-// NewQTFFFormat returns a new Quicktime format
-func NewQTFFFormat(h QTFF) Format {
-	return Format{t: qtffMediaFormat, mov: h}
-}
-
-// NewMP4Format returns a new MPEG-4 format
-func NewMP4Format(h MP4) Format {
-	return Format{t: mp4MediaFormat, mp4: h}
-}
-
-// NewAVIFormat returns a new MPEG-4 format
-func NewAVIFormat(h AVI) Format {
-	return Format{t: aviMediaFormat, avi: h}
-}
-
-// New3PGFormat returns a new 3PG format
-func New3PGFormat(h GPP) Format {
-	return Format{t: gppMediaFormat, gpp: h}
-}
-
-// New3G2Format returns a new 3G2 format
-func New3G2Format(h GPP2) Format {
-	return Format{t: gpp2MediaFormat, gpp2: h}
+func contains(toMatch map[string]struct{}, s string) bool {
+	_, ok := toMatch[s]
+	return ok
 }
 
 // FormatWithVisitor is a generic Format union type visitor
 type FormatWithVisitor[T any] Format
-
-// Accept visits all known Format types
-func (f *FormatWithVisitor[T]) Accept(ctx context.Context, v VisitorFunc[T]) (T, error) {
-	switch f.t {
-	case jpegMediaFormat:
-		return v.VisitJPEG(ctx, f.jpeg)
-	case pngMediaFormat:
-		return v.VisitPNG(ctx, f.png)
-	case heifMediaFormat:
-		return v.VisitHEIF(ctx, f.heif)
-	case tiffMediaFormat:
-		return v.VisitTIFF(ctx, f.tiff)
-	case qtffMediaFormat:
-		return v.VisitQTFF(ctx, f.mov)
-	case mp4MediaFormat:
-		return v.VisitMP4(ctx, f.mp4)
-	case aviMediaFormat:
-		return v.VisitAVI(ctx, f.avi)
-	case gppMediaFormat:
-		return v.Visit3PG(ctx, f.gpp)
-	case gpp2MediaFormat:
-		return v.Visit3G2(ctx, f.gpp2)
-	default:
-		return *new(T), fmt.Errorf("unknown media type")
-	}
-}
 
 // VisitorFunc implements a Visitor type that handles all known Format types
 type VisitorFunc[T any] interface {
@@ -120,7 +79,68 @@ type VisitorFunc[T any] interface {
 	Visit3G2(context.Context, GPP2) (T, error)
 }
 
-// EqualFormats returns true if two Formats are the same type
+// Accept visits the current media type using the visitor pattern
+func (f *FormatWithVisitor[T]) Accept(ctx context.Context, v VisitorFunc[T]) (T, error) {
+	switch f.media.(type) {
+	case JPEG:
+		return v.VisitJPEG(ctx, f.media.(JPEG))
+	case PNG:
+		return v.VisitPNG(ctx, f.media.(PNG))
+	case HEIF:
+		return v.VisitHEIF(ctx, f.media.(HEIF))
+	case TIFF:
+		return v.VisitTIFF(ctx, f.media.(TIFF))
+	case QTFF:
+		return v.VisitQTFF(ctx, f.media.(QTFF))
+	case MP4:
+		return v.VisitMP4(ctx, f.media.(MP4))
+	case AVI:
+		return v.VisitAVI(ctx, f.media.(AVI))
+	case GPP:
+		return v.Visit3PG(ctx, f.media.(GPP))
+	case GPP2:
+		return v.Visit3G2(ctx, f.media.(GPP2))
+	case Unknown:
+	default:
+	}
+	return *new(T), fmt.Errorf("unknown media type")
+}
+
+// EqualFormats returns true if two Formats are of the same media type
 func EqualFormats(a, b Format) bool {
-	return a.t == b.t
+	// Use type assertions to compare the types of media
+	switch a.media.(type) {
+	case JPEG:
+		_, ok := b.media.(JPEG)
+		return ok
+	case PNG:
+		_, ok := b.media.(PNG)
+		return ok
+	case HEIF:
+		_, ok := b.media.(HEIF)
+		return ok
+	case TIFF:
+		_, ok := b.media.(TIFF)
+		return ok
+	case QTFF:
+		_, ok := b.media.(QTFF)
+		return ok
+	case MP4:
+		_, ok := b.media.(MP4)
+		return ok
+	case AVI:
+		_, ok := b.media.(AVI)
+		return ok
+	case GPP:
+		_, ok := b.media.(GPP)
+		return ok
+	case GPP2:
+		_, ok := b.media.(GPP2)
+		return ok
+	case Unknown:
+		_, ok := b.media.(Unknown)
+		return ok
+	default:
+		return false
+	}
 }

@@ -109,7 +109,7 @@ func (s *metadataFileHandler) shouldSkip(ctx context.Context, srcMedia mediatype
 }
 
 func (s *metadataFileHandler) isDuplicateImage(ctx context.Context, srcMedia mediatype.Format, outPath string) (bool, error) {
-	outMedia, err := mediatype.ID(outPath, s.useInputMagicSignature)
+	outMedia, err := mediatype.NewFormat(outPath, s.useInputMagicSignature)
 	if err != nil {
 		return false, err
 	}

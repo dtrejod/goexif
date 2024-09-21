@@ -8,25 +8,11 @@ import (
 	"strings"
 
 	"github.com/dtrejod/goexif/internal/ilog"
-	"github.com/dtrejod/goexif/internal/mediatype"
 	"github.com/dtrejod/goexif/internal/visitors"
 	"go.uber.org/zap"
 )
 
 var (
-	// DefaultFileTypes are the default media types handled by the sorter if none are specified.
-	// NOTE: This default list should match the known mediatypes in the ./internal/mediatype package.
-	DefaultFileTypes = []string{
-		mediatype.JPEG{}.String(),
-		mediatype.PNG{}.String(),
-		mediatype.HEIF{}.String(),
-		mediatype.TIFF{}.String(),
-		mediatype.QTFF{}.String(),
-		mediatype.MP4{}.String(),
-		mediatype.AVI{}.String(),
-		mediatype.GPP{}.String(),
-		mediatype.GPP2{}.String(),
-	}
 	// DefaultBlocklist are default regexes that are ignored by the sorter.
 	DefaultBlocklist = []*regexp.Regexp{
 		// ignore date pattern used internally by the sorter.
