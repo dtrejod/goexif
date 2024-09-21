@@ -12,7 +12,10 @@ import (
 func TestNewFormat(t *testing.T) {
 	tmpDir, err := os.MkdirTemp("", t.Name())
 	require.NoError(t, err)
-	defer os.RemoveAll(tmpDir)
+	defer func() {
+		err := os.RemoveAll(tmpDir)
+		require.NoError(t, err)
+	}()
 
 	// Test that NewFormat() returns a Format with the correct media type
 	for _, mt := range AllKnownMediaTypes {
