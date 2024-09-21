@@ -21,8 +21,8 @@ func TestNewFormat(t *testing.T) {
 	for _, mt := range AllKnownMediaTypes {
 		// Test with a file extension
 		tmpFile, err := os.CreateTemp(tmpDir, fmt.Sprintf("*.%s", mt.Ext()))
-		defer tmpFile.Close()
 		require.NoError(t, err)
+		defer tmpFile.Close()
 
 		f, err := NewFormat(tmpFile.Name(), false)
 		assert.NoError(t, err)
