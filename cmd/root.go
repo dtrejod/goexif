@@ -6,12 +6,14 @@ import (
 	"github.com/dtrejod/goexif/internal/ilog"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 var (
-	ctx     context.Context
-	debug   bool
-	rootCmd = &cobra.Command{
+	ctx         context.Context
+	debug       bool
+	logEncoding string
+	rootCmd     = &cobra.Command{
 		Use:               "goexif",
 		Short:             "A tool for interacting with media files via their exif/file metadata",
 		PersistentPreRunE: initLoggers,
@@ -25,6 +27,15 @@ func initLoggers(_ *cobra.Command, _ []string) error {
 	if debug {
 		logConfig.Level = zap.NewAtomicLevelAt(zap.DebugLevel)
 	}
+	logConfig.Encoding = logEncoding
+
+	// if console encoding, make the logs more human readable
+	if logEncoding == "console" {
+		logConfig.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
+		logConfig.EncoderConfig.ConsoleSeparator = " "
+		logConfig.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
+	}
+
 	logger, err := logConfig.Build()
 	if err != nil {
 		return err
@@ -35,6 +46,7 @@ func initLoggers(_ *cobra.Command, _ []string) error {
 
 func init() {
 	rootCmd.PersistentFlags().BoolVarP(&debug, "debug", "d", false, "run in debug mode")
+	rootCmd.PersistentFlags().StringVarP(&logEncoding, "log-encoding", "e", "console", "log encoding (json or console)")
 }
 
 // Execute runs the root command tree
