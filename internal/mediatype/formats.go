@@ -49,13 +49,28 @@ func NewFormat(path string, useSignature bool) (Format, error) {
 		}
 		ext = t.Extension
 	}
-
-	for _, mt := range AllKnownMediaTypes {
-		if contains(mt.Aliases(), ext) {
-			return Format{media: mt}, nil
-		}
+	switch {
+	case contains(JPEG{}.Aliases(), ext):
+		return Format{media: JPEG{Path: path}}, nil
+	case contains(PNG{}.Aliases(), ext):
+		return Format{media: PNG{Path: path}}, nil
+	case contains(HEIF{}.Aliases(), ext):
+		return Format{media: HEIF{Path: path}}, nil
+	case contains(TIFF{}.Aliases(), ext):
+		return Format{media: TIFF{Path: path}}, nil
+	case contains(QTFF{}.Aliases(), ext):
+		return Format{media: QTFF{Path: path}}, nil
+	case contains(MP4{}.Aliases(), ext):
+		return Format{media: MP4{Path: path}}, nil
+	case contains(AVI{}.Aliases(), ext):
+		return Format{media: AVI{Path: path}}, nil
+	case contains(GPP{}.Aliases(), ext):
+		return Format{media: GPP{Path: path}}, nil
+	case contains(GPP2{}.Aliases(), ext):
+		return Format{media: GPP2{Path: path}}, nil
+	default:
+		return Format{media: Unknown{}}, nil
 	}
-	return Format{media: Unknown{}}, nil
 }
 
 func contains(toMatch map[string]struct{}, s string) bool {
