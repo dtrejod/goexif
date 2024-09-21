@@ -73,6 +73,14 @@ func (m *mediaCompare) VisitAVI(ctx context.Context, outMedia mediatype.AVI) (bo
 	return compareUsingSHA256(ctx, m.srcPath, outMedia.Path)
 }
 
+func (m *mediaCompare) Visit3PG(ctx context.Context, outMedia mediatype.GPP) (bool, error) {
+	return compareUsingSHA256(ctx, m.srcPath, outMedia.Path)
+}
+
+func (m *mediaCompare) Visit3G2(ctx context.Context, outMedia mediatype.GPP2) (bool, error) {
+	return compareUsingSHA256(ctx, m.srcPath, outMedia.Path)
+}
+
 func compareUsingPHash(ctx context.Context, src, dest string) (bool, error) {
 	logger := ilog.FromContext(ctx).With(
 		zap.String("sourcePath", src),

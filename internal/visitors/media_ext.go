@@ -40,3 +40,11 @@ func (m *mediaExt) VisitMP4(_ context.Context, media mediatype.MP4) (map[string]
 func (m *mediaExt) VisitAVI(_ context.Context, media mediatype.AVI) (map[string]struct{}, error) {
 	return media.Aliases(), nil
 }
+
+func (m *mediaExt) Visit3PG(_ context.Context, media mediatype.GPP) (map[string]struct{}, error) {
+	return media.Aliases(), nil
+}
+
+func (m *mediaExt) Visit3G2(_ context.Context, media mediatype.GPP2) (map[string]struct{}, error) {
+	return media.Aliases(), nil
+}
