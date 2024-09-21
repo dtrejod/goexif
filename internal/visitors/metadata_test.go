@@ -17,7 +17,7 @@ func TestMetadataFilename(t *testing.T) {
 			OutPath:   "2000/01/01/white.png",
 			Timestamp: time.Date(2000, 01, 01, 0, 0, 0, 0, time.UTC),
 		}
-		srcMedia, err := mediatype.ID("./testdata/white.png", false)
+		srcMedia, err := mediatype.NewFormat("./testdata/white.png", false)
 		assert.NoError(t, err)
 
 		visitorFunc := NewMediaMetadataFilename(ctx, toPtr("."), false, false, false)
@@ -47,7 +47,7 @@ func TestMetadataFilename(t *testing.T) {
 			OutPath:   "2000/01/01/946684800.png",
 			Timestamp: time.Date(2000, 01, 01, 0, 0, 0, 0, time.UTC),
 		}
-		srcMedia, err := mediatype.ID("./testdata/white.png", false)
+		srcMedia, err := mediatype.NewFormat("./testdata/white.png", false)
 		assert.NoError(t, err)
 
 		visitorFunc := NewMediaMetadataFilename(ctx, toPtr("."), false, true, false)
@@ -63,7 +63,7 @@ func TestMetadataFilename(t *testing.T) {
 			OutPath:   "2000/01/01/ispng.png",
 			Timestamp: time.Date(2000, 01, 01, 0, 0, 0, 0, time.UTC),
 		}
-		srcMedia, err := mediatype.ID("./testdata/ispng.jpg", true)
+		srcMedia, err := mediatype.NewFormat("./testdata/ispng.jpg", true)
 		assert.NoError(t, err)
 
 		visitorFunc := NewMediaMetadataFilename(ctx, toPtr("."), false, false, true)

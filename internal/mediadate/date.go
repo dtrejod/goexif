@@ -11,7 +11,7 @@ import (
 
 // Print logs the datetime for a provided mediafile
 func Print(ctx context.Context, path string, useMagicSignature bool) error {
-	media, err := mediatype.ID(path, useMagicSignature)
+	media, err := mediatype.NewFormat(path, useMagicSignature)
 	if err != nil {
 		return err
 	}
