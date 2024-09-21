@@ -36,6 +36,10 @@ func ID(path string, useSignature bool) (Format, error) {
 		return NewMP4Format(MP4{Path: path}), nil
 	case contains(AVI{}.Aliases(), ext):
 		return NewAVIFormat(AVI{Path: path}), nil
+	case contains(GPP{}.Aliases(), ext):
+		return New3PGFormat(GPP{Path: path}), nil
+	case contains(GPP2{}.Aliases(), ext):
+		return New3G2Format(GPP2{Path: path}), nil
 	default:
 		return Format{}, nil
 	}

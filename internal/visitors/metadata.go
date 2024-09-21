@@ -84,6 +84,14 @@ func (e *mediaMetadataFilename) VisitAVI(ctx context.Context, image mediatype.AV
 	return e.getTimeMetadataWithFunc(ctx, image.Path, riffdata.GetTime, image.Ext())
 }
 
+func (e *mediaMetadataFilename) Visit3PG(ctx context.Context, image mediatype.GPP) (MediaMetadata, error) {
+	return e.getTimeMetadataWithFunc(ctx, image.Path, moovdata.GetTime, image.Ext())
+}
+
+func (e *mediaMetadataFilename) Visit3G2(ctx context.Context, image mediatype.GPP2) (MediaMetadata, error) {
+	return e.getTimeMetadataWithFunc(ctx, image.Path, moovdata.GetTime, image.Ext())
+}
+
 func (e *mediaMetadataFilename) getTimeMetadataWithFunc(
 	ctx context.Context,
 	srcPath string,

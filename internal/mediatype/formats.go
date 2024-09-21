@@ -15,6 +15,8 @@ type Format struct {
 	mov  QTFF
 	mp4  MP4
 	avi  AVI
+	gpp  GPP
+	gpp2 GPP2
 }
 
 type mediaFormat string
@@ -27,6 +29,8 @@ const (
 	qtffMediaFormat mediaFormat = "qtff"
 	mp4MediaFormat  mediaFormat = "mp4"
 	aviMediaFormat  mediaFormat = "avi"
+	gppMediaFormat  mediaFormat = "gpp"
+	gpp2MediaFormat mediaFormat = "gpp2"
 )
 
 // NewJPEGFormat returns a new JPEG format
@@ -64,6 +68,16 @@ func NewAVIFormat(h AVI) Format {
 	return Format{t: aviMediaFormat, avi: h}
 }
 
+// New3PGFormat returns a new 3PG format
+func New3PGFormat(h GPP) Format {
+	return Format{t: gppMediaFormat, gpp: h}
+}
+
+// New3G2Format returns a new 3G2 format
+func New3G2Format(h GPP2) Format {
+	return Format{t: gpp2MediaFormat, gpp2: h}
+}
+
 // FormatWithVisitor is a generic Format union type visitor
 type FormatWithVisitor[T any] Format
 
@@ -84,6 +98,10 @@ func (f *FormatWithVisitor[T]) Accept(ctx context.Context, v VisitorFunc[T]) (T,
 		return v.VisitMP4(ctx, f.mp4)
 	case aviMediaFormat:
 		return v.VisitAVI(ctx, f.avi)
+	case gppMediaFormat:
+		return v.Visit3PG(ctx, f.gpp)
+	case gpp2MediaFormat:
+		return v.Visit3G2(ctx, f.gpp2)
 	default:
 		return *new(T), fmt.Errorf("unknown media type")
 	}
@@ -98,6 +116,8 @@ type VisitorFunc[T any] interface {
 	VisitQTFF(context.Context, QTFF) (T, error)
 	VisitMP4(context.Context, MP4) (T, error)
 	VisitAVI(context.Context, AVI) (T, error)
+	Visit3PG(context.Context, GPP) (T, error)
+	Visit3G2(context.Context, GPP2) (T, error)
 }
 
 // EqualFormats returns true if two Formats are the same type

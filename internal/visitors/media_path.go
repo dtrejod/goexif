@@ -40,3 +40,11 @@ func (m *mediaPath) VisitMP4(_ context.Context, media mediatype.MP4) (string, er
 func (m *mediaPath) VisitAVI(_ context.Context, media mediatype.AVI) (string, error) {
 	return media.Path, nil
 }
+
+func (m *mediaPath) Visit3PG(_ context.Context, media mediatype.GPP) (string, error) {
+	return media.Path, nil
+}
+
+func (m *mediaPath) Visit3G2(_ context.Context, media mediatype.GPP2) (string, error) {
+	return media.Path, nil
+}
