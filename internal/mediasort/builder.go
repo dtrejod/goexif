@@ -24,6 +24,8 @@ var (
 		mediatype.QTFF{}.String(),
 		mediatype.MP4{}.String(),
 		mediatype.AVI{}.String(),
+		mediatype.GPP{}.String(),
+		mediatype.GPP2{}.String(),
 	}
 	// DefaultBlocklist are default regexes that are ignored by the sorter.
 	DefaultBlocklist = []*regexp.Regexp{
