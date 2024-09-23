@@ -6,7 +6,7 @@ require (
 	github.com/abema/go-mp4 v1.2.0
 	github.com/corona10/goimagehash v1.1.0
 	github.com/dsoprea/go-exif/v3 v3.0.1
-	github.com/go-errors/errors v1.4.2
+	github.com/go-errors/errors v1.5.1
 	github.com/h2non/filetype v1.1.3
 	github.com/spf13/cobra v1.8.1
 	github.com/stretchr/testify v1.9.0
