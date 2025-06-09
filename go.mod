@@ -1,6 +1,7 @@
 module github.com/dtrejod/goexif
 
-go 1.23
+go 1.23.0
+
 toolchain go1.24.1
 
 require (
@@ -12,7 +13,7 @@ require (
 	github.com/spf13/cobra v1.9.1
 	github.com/stretchr/testify v1.10.0
 	go.uber.org/zap v1.27.0
-	golang.org/x/image v0.27.0
+	golang.org/x/image v0.28.0
 )
 
 require (
