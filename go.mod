@@ -12,7 +12,7 @@ require (
 	github.com/h2non/filetype v1.1.3
 	github.com/spf13/cobra v1.10.1
 	github.com/stretchr/testify v1.11.1
-	go.uber.org/zap v1.27.0
+	go.uber.org/zap v1.27.1
 	golang.org/x/image v0.33.0
 )
 
