@@ -11,6 +11,8 @@ var (
 // init initializes the FileTypes variable
 func init() {
 	for _, media := range mediatype.AllKnownMediaTypes {
-		DefaultFileTypes = append(DefaultFileTypes, media.String())
+		for alias := range media.Aliases() {
+			DefaultFileTypes = append(DefaultFileTypes, alias)
+		}
 	}
 }
