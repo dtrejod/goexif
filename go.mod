@@ -1,8 +1,6 @@
 module github.com/dtrejod/goexif
 
-go 1.24.0
-
-toolchain go1.24.1
+go 1.26.0
 
 require (
 	github.com/abema/go-mp4 v1.4.1
