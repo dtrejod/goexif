@@ -15,7 +15,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
 
     - name: Print Github Build Environment
       run: echo "$GITHUB_VARS"
@@ -24,7 +24,7 @@ jobs:
         GITHUB_VARS: ${{ toJson(github) }}
 
     - name: Set up Go
-      uses: actions/setup-go@v5
+      uses: actions/setup-go@v6
       with:
         go-version-file: go.mod
 
@@ -65,7 +65,7 @@ jobs:
         goarch: [amd64, arm64]
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
 
     - name: Print Github Build Environment
       run: echo "$GITHUB_VARS"
@@ -74,7 +74,7 @@ jobs:
         GITHUB_VARS: ${{ toJson(github) }}
 
     - name: Set up Go
-      uses: actions/setup-go@v5
+      uses: actions/setup-go@v6
       with:
         go-version-file: go.mod
 
