@@ -22,11 +22,11 @@ type metadataFileHandler struct {
 	mediaMetadataVisitorFunc mediatype.VisitorFunc[visitors.MediaMetadata]
 }
 
-// handle takes in a source media file, and will move it a computed output file
+// handleMediaFile takes in a source media file, and will move it a computed output file
 // based on media metadata
-func (s *metadataFileHandler) handle(ctx context.Context, srcMedia mediatype.Format) error {
-	visitor := mediatype.FormatWithVisitor[string](srcMedia)
-	srcPath, err := visitor.Accept(ctx, visitors.NewMediaPath(ctx))
+func (s *metadataFileHandler) handleMediaFile(ctx context.Context, srcMedia mediatype.Format) error {
+	mediaVisitor := mediatype.FormatWithVisitor[string](srcMedia)
+	srcPath, err := mediaVisitor.Accept(ctx, visitors.NewMediaPath(ctx))
 	if err != nil {
 		return err
 	}

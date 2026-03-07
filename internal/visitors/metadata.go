@@ -3,9 +3,6 @@ package visitors
 import (
 	"context"
 	"os"
-	"path/filepath"
-	"strconv"
-	"strings"
 	"time"
 
 	"github.com/dtrejod/goexif/internal/exifdata"
@@ -19,16 +16,12 @@ const (
 )
 
 type mediaMetadataFilename struct {
-	outDir                  *string
-	useLastModifiedDate     bool
-	timestampAsFilename     bool
-	useOutputMagicSignature bool
+	useLastModifiedDate bool
+	timestampAsFilename bool
 }
 
 // MediaMetadata is the return type from the MediaMetadataFilename visitor
 type MediaMetadata struct {
-	// OutPath is an appropriate new output filename for the provided mediatype format.
-	OutPath   string
 	Timestamp time.Time
 }
 
@@ -46,10 +39,8 @@ func NewMediaMetadataFilename(
 	useOutputMagicSignature bool,
 ) mediatype.VisitorFunc[MediaMetadata] {
 	return &mediaMetadataFilename{
-		outDir:                  outDir,
-		useLastModifiedDate:     useLastModifiedDate,
-		timestampAsFilename:     timestampAsFilename,
-		useOutputMagicSignature: useOutputMagicSignature,
+		useLastModifiedDate: useLastModifiedDate,
+		timestampAsFilename: timestampAsFilename,
 	}
 }
 
@@ -105,36 +96,10 @@ func (e *mediaMetadataFilename) getTimeMetadataWithFunc(
 			return MediaMetadata{}, err
 		}
 	}
-	outFile, err := e.getOutputFile(ctx, srcPath, cleanEXT, ts.UTC())
-	if err != nil {
-		return MediaMetadata{}, err
-	}
 
 	return MediaMetadata{
-		OutPath:   outFile,
 		Timestamp: ts,
 	}, nil
-}
-
-func (e *mediaMetadataFilename) getOutputFile(_ context.Context, srcPath, cleanExt string, ts time.Time) (string, error) {
-	srcDir := filepath.Dir(srcPath)
-	outDir := filepath.Join(srcDir, ts.Format(outPathDateFormat))
-	if e.outDir != nil {
-		outDir = filepath.Join(*e.outDir, ts.Format(outPathDateFormat))
-	}
-
-	ext := filepath.Ext(srcPath)
-	if e.useOutputMagicSignature {
-		ext = cleanExt
-	}
-	outFilename := strings.TrimSuffix(filepath.Base(srcPath), filepath.Ext(srcPath))
-	if e.timestampAsFilename {
-		outFilename = strconv.FormatInt(ts.Unix(), 10)
-	}
-
-	outFilename = outFilename + ext
-	return filepath.Join(outDir, outFilename), nil
-
 }
 
 func (e *mediaMetadataFilename) fallbackToModTime(srcPath string, origErr error) (time.Time, error) {

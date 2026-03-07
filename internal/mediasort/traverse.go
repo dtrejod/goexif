@@ -20,28 +20,46 @@ type traverser struct {
 	blocklist              []*regexp.Regexp
 	useInputMagicSignature bool
 
-	fileHandler     *metadataFileHandler
-	progressTracker *progressTracker
-	extVisitorFunc  mediatype.VisitorFunc[map[string]struct{}]
+	fileHandler    *metadataFileHandler
+	extVisitorFunc mediatype.VisitorFunc[map[string]struct{}]
 }
+
+// innerTraverseFunc is a function that is called for each file that is traversed.
+type innerTraverseFunc = func(logger *zap.Logger, srcMedia mediatype.Format) error
 
 // Run implements Sorter
 func (t *traverser) Run(ctx context.Context) error {
+	progressTracker := &progressTracker{}
+	preScanRunFunc := func(logger *zap.Logger, srcMedia mediatype.Format) error {
+		progressTracker.recordMediaVisit(ctx, true)
+		return nil
+	}
+	sortMediaRunFunc := func(logger *zap.Logger, srcMedia mediatype.Format) error {
+		progressTracker.recordMediaVisit(ctx, false)
+		if err := t.fileHandler.handleMediaFile(ctx, srcMedia); err != nil {
+			logger.Warn("Failed to handle file.", zap.Error(err))
+			if t.stopWalkOnError {
+				return err
+			}
+		}
+		return nil
+	}
+
 	ilog.FromContext(ctx).Info("Performing pre-scan for media files...", zap.String("directory", t.sourceDirectory))
-	if err := filepath.WalkDir(t.sourceDirectory, t.traverseFunc(ctx, true)); err != nil {
+	if err := filepath.WalkDir(t.sourceDirectory, t.traverseFunc(ctx, preScanRunFunc)); err != nil {
 		return err
 	}
 
 	ilog.FromContext(ctx).Info("Sorting media files in directory...", zap.String("directory", t.sourceDirectory))
-	if err := filepath.WalkDir(t.sourceDirectory, t.traverseFunc(ctx, false)); err != nil {
+	if err := filepath.WalkDir(t.sourceDirectory, t.traverseFunc(ctx, sortMediaRunFunc)); err != nil {
 		return err
 	}
 
-	ilog.FromContext(ctx).Info("Succesfully sorted media files.")
+	ilog.FromContext(ctx).Info("Successfully sorted media files.")
 	return nil
 }
 
-func (t *traverser) traverseFunc(ctx context.Context, isPreRun bool) fs.WalkDirFunc {
+func (t *traverser) traverseFunc(ctx context.Context, innerCallbackFunc innerTraverseFunc) fs.WalkDirFunc {
 	return func(path string, info fs.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -50,14 +68,14 @@ func (t *traverser) traverseFunc(ctx context.Context, isPreRun bool) fs.WalkDirF
 
 		if info.IsDir() {
 			if t.skipDir(path) {
-				logger.Debug("Directory matches blocklist, so skipping entire directory...")
+				logger.Debug("Directory matches blocklist, so skipping entire directory.")
 				return fs.SkipDir
 			}
 			return nil
 		}
 
 		if t.skipDir(path) {
-			logger.Debug("Path in blocklist, so skipping...")
+			logger.Debug("Path in blocklist, so skipping.")
 			return fs.SkipDir
 		}
 
@@ -74,26 +92,13 @@ func (t *traverser) traverseFunc(ctx context.Context, isPreRun bool) fs.WalkDirF
 			return nil
 		}
 
-		logger.Debug("Checking file.")
+		logger.Debug("Checking file...")
 		if t.skipFile(aliases) {
-			logger.Debug("File did not matchfile types allowlist, so skipping...")
+			logger.Debug("File did not matchfile types allowlist, so skipping.")
 			return nil
 		}
 
-		if isPreRun {
-			t.progressTracker.handle(ctx, true)
-			return nil
-		}
-
-		t.progressTracker.handle(ctx, false)
-		if err := t.fileHandler.handle(ctx, srcMedia); err != nil {
-			logger.Warn("Failed to handle file.", zap.Error(err))
-			if t.stopWalkOnError {
-				return err
-			}
-		}
-
-		return nil
+		return innerCallbackFunc(logger, srcMedia)
 	}
 }
 
