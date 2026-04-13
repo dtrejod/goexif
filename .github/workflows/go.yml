@@ -82,6 +82,6 @@ jobs:
       run: GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -v -ldflags="-X github.com/${{ github.repository }}/version.version=${{ github.ref_name }}" -o ./${{ github.event.repository.name }}-${{ matrix.goarch }}-${{ matrix.goos }}
 
     - name: Release
-      uses: softprops/action-gh-release@v2
+      uses: softprops/action-gh-release@v3
       with:
         files: ./${{ github.event.repository.name }}-${{ matrix.goarch }}-${{ matrix.goos }}
