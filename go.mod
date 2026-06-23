@@ -3,7 +3,7 @@ module github.com/dtrejod/goexif
 go 1.26.0
 
 require (
-	github.com/abema/go-mp4 v1.6.0
+	github.com/abema/go-mp4 v1.7.1
 	github.com/corona10/goimagehash v1.1.0
 	github.com/dsoprea/go-exif/v3 v3.0.1
 	github.com/go-errors/errors v1.5.1
