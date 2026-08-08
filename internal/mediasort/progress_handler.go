@@ -19,11 +19,11 @@ type progressTracker struct {
 	totalMediaFiles   int
 }
 
-// handle is used to track progress of a scan run. It requires traversing
+// recordMediaVisit is used to track progress of a scan run. It requires traversing
 // through a folder once to accumulate a count the total number of files that
 // will be handled. Then on second pass it will log occasionally the overall
 // progress.
-func (s *progressTracker) handle(ctx context.Context, isAccumulating bool) {
+func (s *progressTracker) recordMediaVisit(ctx context.Context, isAccumulating bool) {
 	if isAccumulating {
 		s.totalMediaFiles++
 		return
